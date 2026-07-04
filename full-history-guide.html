@@ -1,0 +1,1315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Split Lightweight History Companion</title>
+<style>
+:root {
+  --bg:#0c0f14; --panel:#151922; --panel2:#1c2230; --text:#f5f2e8; --muted:#c6c0b5;
+  --gold:#f4c95d; --blue:#9bd8ff; --red:#ff7b72; --green:#b7f7b0; --line:#32394b;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body {
+  margin:0; background:linear-gradient(180deg,#0c0f14,#121720 55%,#0c0f14);
+  color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;
+  line-height:1.55;
+}
+header {
+  position:sticky; top:0; z-index:20; backdrop-filter: blur(14px);
+  background:rgba(12,15,20,.93); border-bottom:1px solid var(--line);
+  padding:14px 14px 12px;
+}
+.header-inner{max-width:980px;margin:auto}
+h1{font-size:1.25rem;line-height:1.1;margin:0 0 4px}
+.sub{margin:0;color:var(--muted);font-size:.9rem}
+main{max-width:980px;margin:0 auto;padding:14px}
+.hero,.route,.card,.panel {
+  background:rgba(21,25,34,.97); border:1px solid var(--line); border-radius:18px;
+  padding:16px; margin:0 0 14px; box-shadow:0 14px 35px rgba(0,0,0,.22);
+}
+.kicker{color:var(--gold);font-size:.78rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase}
+h2{margin:.15rem 0 .15rem;font-size:1.25rem;line-height:1.15}
+h3{margin:14px 0 6px;color:var(--gold)}
+p{margin:7px 0}
+.muted,.small{color:var(--muted)}
+.small{font-size:.9rem}
+.buttons{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0}
+.buttons a,.filterbar a,.jump a {
+  appearance:none;border:0;text-decoration:none;color:#071018;background:var(--gold);
+  padding:10px 12px;border-radius:13px;font-weight:850;display:inline-block;font-size:.93rem;
+}
+.buttons a:nth-child(2){background:var(--blue)}
+.buttons a:nth-child(3){background:var(--green)}
+.filterbar{display:flex;gap:8px;overflow-x:auto;padding:6px 0 0;margin:0 -2px}
+.filterbar a{white-space:nowrap;background:#252d3d;color:var(--text);border:1px solid #3a4358}
+.filterbar a:focus,.filterbar a:hover{background:var(--gold);color:#071018}
+.jump{display:grid;grid-template-columns:1fr;gap:8px;max-height:330px;overflow:auto;padding-right:4px}
+.jump a{background:var(--panel2);color:var(--text);font-weight:700;border:1px solid #30384b}
+.jump a span{color:var(--gold)}
+.card-head{display:flex;gap:12px;align-items:flex-start}
+.num{min-width:42px;height:42px;border-radius:50%;background:var(--gold);color:#0b0e12;display:grid;place-items:center;font-weight:950;font-size:1.05rem}
+.zone{color:var(--blue);font-size:.78rem;font-weight:900;text-transform:uppercase;letter-spacing:.05em}
+.vibe{color:var(--muted);font-size:.92rem;margin:0}
+.summary{font-size:1.02rem}
+details{background:#10141d;border:1px solid #2a3142;border-radius:13px;padding:10px 12px;margin:10px 0}
+summary{font-weight:850;color:#ffe08b;cursor:pointer}
+ul{padding-left:20px;margin:8px 0}
+li{margin:4px 0}
+.battle{border:1px solid #604044;background:linear-gradient(180deg,#241417,#1a1114);border-radius:15px;padding:12px;margin:12px 0}
+.battle-title{font-weight:950;color:#ffb0a8;margin-bottom:8px;font-size:1.02rem}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{border-top:1px solid #4a3034;padding:7px;vertical-align:top}
+th{width:28%;text-align:left;color:#ffd0cc}
+.next{color:var(--muted)}
+.tl{display:grid;grid-template-columns:105px 1fr;gap:10px;border-left:3px solid var(--gold);padding:8px 0 8px 12px;margin-left:6px}
+.tl b{color:var(--gold)}
+.tl span{color:var(--muted)}
+.note{background:#172233;border-left:4px solid var(--blue);padding:12px;border-radius:13px}
+.warn{background:#2a1717;border-left:4px solid var(--red);padding:12px;border-radius:13px}
+footer{padding:24px 14px 40px;color:var(--muted);text-align:center}
+.sources a{color:var(--blue)}
+.hide{display:none}
+
+.section-anchor{
+  scroll-margin-top:118px;
+  background:linear-gradient(90deg,#222939,#171b25);
+  border:1px solid var(--line);
+  border-left:5px solid var(--gold);
+  border-radius:16px;
+  padding:14px 16px;
+  margin:20px 0 12px;
+}
+.section-anchor h2{margin:0 0 4px}
+.section-anchor p{margin:0;color:var(--muted)}
+.card{scroll-margin-top:118px}
+
+@media(min-width:720px){
+ h1{font-size:1.8rem}
+ .jump{grid-template-columns:1fr 1fr}
+ main{padding:18px}
+ .hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}
+}
+@media print{
+ header .buttons,.filterbar{display:none}
+ body{background:white;color:black}
+ .card,.hero,.route,.panel{box-shadow:none;border:1px solid #aaa;background:white;break-inside:avoid}
+ details{border:1px solid #aaa;background:white}
+ details:not([open])>*:not(summary){display:block}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <h1>Split History Companion</h1>
+    <p class="sub">Lightweight walking guide: Roman palace · brutal history · Game of Thrones · battle cards · local-friend pacing</p>
+    <nav class="filterbar" aria-label="Section navigation">
+    <a href="/">🗺️ Back to Maps</a>
+      <a href="#all-stops">All</a>
+      <a href="#core-palace">Core Palace</a>
+      <a href="#medieval-city">Medieval</a>
+      <a href="#waterfront">Waterfront</a>
+      <a href="#extensions">Salona/Klis</a>
+      <a href="#modern-layers">Modern wars</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-grid">
+      <div>
+        <div class="kicker">Purpose</div>
+        <h2>Use this like a local friend who secretly loves Total War.</h2>
+        <p>It is designed for walking, not studying. Skim the summary, tap deeper when a stop hits, and use battle cards when the location connects to real conflict.</p>
+        <div class="buttons">
+          <a href="https://www.google.com/maps/dir/?api=1&origin=Golden%20Gate%20Split%20Croatia&destination=Green%20Market%20Split%20Croatia%20Pazar&travelmode=walking&waypoints=Iron%20Gate%20Split%20Croatia%7CPeople%27s%20Square%20Split%20Croatia%20Pjaca%7CRiva%20Split%20Croatia%7CBronze%20Gate%20Split%20Croatia%7CDiocletian%27s%20Cellars%20Split%7CPeristyle%20Split%20Croatia%7CCathedral%20of%20Saint%20Domnius%20Split" target="_blank" rel="noopener">🗺️ Core walking route</a>
+          <a href="https://www.google.com/maps/dir/?api=1&origin=Split%20Riva%20Croatia&destination=Klis%20Fortress%20Croatia&travelmode=driving&waypoints=Salona%20Archaeological%20Park%20Solin%20Croatia" target="_blank" rel="noopener">⚔️ Salona + Klis route</a>
+          <a href="https://www.google.com/maps/dir/?api=1&origin=Riva%20Split%20Croatia&destination=Vidilica%20Split%20Croatia&travelmode=walking" target="_blank" rel="noopener">🌄 Riva → Marjan</a>
+          <a href="https://www.google.com/maps/dir/?api=1&origin=Riva%20Split%20Croatia&destination=Bacvice%20Beach%20Split%20Croatia&travelmode=walking" target="_blank" rel="noopener">🏖️ Riva → Bačvice</a>
+        </div>
+        <div class="note"><strong>Map fix:</strong> no embedded iframes. Direct Google Maps links work more reliably from a saved HTML file on mobile.</div>
+      </div>
+      <div>
+        <div class="kicker">Best today</div>
+        <p><strong>11:30 AM start:</strong> Golden Gate → palace core → Riva drink/lunch → cellars → Peristyle/Cathedral.</p>
+        <p><strong>If energy later:</strong> Marjan sunset. If you want brutal war history tomorrow: Salona + Klis.</p>
+        <p class="small">The core route is walkable. Salona/Klis are taxi/Uber or tour extensions.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="route">
+    <div class="kicker">Timeline ribbon</div>
+    <h2>What era are you standing in?</h2>
+    <div class='tl'><b>2nd c. BC–1st c. AD</b><span>Roman power grows in Dalmatia; Salona becomes the regional anchor.</span></div><div class='tl'><b>AD 284–305</b><span>Diocletian rules, reforms the empire, and builds his palace near Salona.</span></div><div class='tl'><b>AD 303–311</b><span>Great Persecution of Christians; Salona’s Christian community produces martyrs.</span></div><div class='tl'><b>5th–7th c.</b><span>Late antique instability; Salona declines/gets abandoned; palace becomes refuge-city.</span></div><div class='tl'><b>Medieval era</b><span>Split grows inside and beyond the palace; churches, squares, and civic life take over Roman spaces.</span></div><div class='tl'><b>Venetian centuries</b><span>Dalmatia becomes a contested Adriatic frontier; coastal towns fortify and trade.</span></div><div class='tl'><b>1537</b><span>Klis falls to Ottoman forces after long frontier resistance.</span></div><div class='tl'><b>1800s</b><span>Napoleonic and then Austrian layers reshape administration and infrastructure.</span></div><div class='tl'><b>WWII</b><span>Split experiences occupation, resistance, bombing, and liberation into socialist Yugoslavia.</span></div><div class='tl'><b>1991 onward</b><span>Croatian independence and modern national memory shape the city you see today.</span></div>
+  </section>
+
+  <section class="panel">
+    <div class="kicker">Quick jump</div>
+    <h2>Stops</h2>
+    <div class="jump"><a href='#stop1' data-zone='Core Palace'><span>1.</span> Golden Gate / Porta Aurea</a><a href='#stop2' data-zone='Core Palace'><span>2.</span> Gregory of Nin Statue</a><a href='#stop3' data-zone='Core Palace'><span>3.</span> North Wall and Defensive Towers</a><a href='#stop4' data-zone='Core Palace'><span>4.</span> Cardo and Decumanus Street Grid</a><a href='#stop5' data-zone='Core Palace'><span>5.</span> Iron Gate / Porta Ferrea</a><a href='#stop6' data-zone='Medieval City'><span>6.</span> People’s Square / Pjaca</a><a href='#stop7' data-zone='Medieval City'><span>7.</span> Fruit Square / Voćni Trg</a><a href='#stop8' data-zone='Medieval City'><span>8.</span> Republic Square / Prokurative</a><a href='#stop9' data-zone='Modern Layers'><span>9.</span> Marmont Street</a><a href='#stop10' data-zone='Waterfront'><span>10.</span> Riva Waterfront</a><a href='#stop11' data-zone='Core Palace'><span>11.</span> Bronze Gate / Southern Gate</a><a href='#stop12' data-zone='Core Palace'><span>12.</span> Diocletian’s Cellars / Palace Basements</a><a href='#stop13' data-zone='Core Palace'><span>13.</span> Vestibule</a><a href='#stop14' data-zone='Core Palace'><span>14.</span> Peristyle</a><a href='#stop15' data-zone='Core Palace'><span>15.</span> Temple of Jupiter / Baptistery</a><a href='#stop16' data-zone='Core Palace'><span>16.</span> Cathedral of Saint Domnius and Bell Tower</a><a href='#stop17' data-zone='Core Palace'><span>17.</span> Silver Gate / Eastern Gate</a><a href='#stop18' data-zone='Local Life'><span>18.</span> Pazar / Green Market</a><a href='#stop19' data-zone='Hidden Alley'><span>19.</span> Let Me Pass Street / Pusti me proć</a><a href='#stop20' data-zone='Viewpoint'><span>20.</span> Marjan Hill / Vidilica Viewpoint</a><a href='#stop21' data-zone='Cooldown'><span>21.</span> Bačvice Beach</a><a href='#stop22' data-zone='Extension'><span>22.</span> Salona Archaeological Site / Solin</a><a href='#stop23' data-zone='Extension'><span>23.</span> Salona Amphitheater</a><a href='#stop24' data-zone='Extension'><span>24.</span> Manastirine Early Christian Complex</a><a href='#stop25' data-zone='Extension'><span>25.</span> Klis Fortress</a><a href='#stop26' data-zone='Extension'><span>26.</span> Klis Game of Thrones / Meereen Viewpoints</a><a href='#stop27' data-zone='Extension'><span>27.</span> Diocletian’s Aqueduct Remains</a><a href='#stop28' data-zone='Modern Layers'><span>28.</span> Split WWII / Partisan Memory Layer</a><a href='#stop29' data-zone='Modern Layers'><span>29.</span> Croatian Independence / 1990s Context</a><a href='#stop30' data-zone='Food/Reset'><span>30.</span> Old Town Konoba / Local Tavern Stop</a></div>
+  </section>
+
+  
+    <div id="all-stops"></div><div id="core-palace" class="section-anchor"><h2>Core Palace Walk</h2><p>Roman walls, gates, Diocletian’s ceremonial center, cellars, and cathedral.</p></div>
+    <article class="card core-palace" id="stop1" data-zone="Core Palace">
+      <div class="card-head">
+        <div class="num">1</div>
+        <div>
+          <div class="zone">Core Palace · Start</div>
+          <h2>Golden Gate / Porta Aurea</h2>
+          <p class="vibe">🏛️ Roman power · 🛡️ fortress logic · ⭐ must-start</p>
+        </div>
+      </div>
+      <p class="summary">The main ceremonial northern gate into Diocletian’s Palace — the best place to start because it frames the whole city as a fortified Roman imperial machine.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Golden%20Gate%20Split%20Croatia" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Golden%20Gate%20Split%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Stand outside and face the gate. Picture double doors, guards, towers, and a controlled entry corridor rather than an open tourist entrance.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>The Golden Gate was the palace’s grand northern entrance, facing the road toward Salona, the Roman provincial capital. Split Tourism notes that Diocletian himself entered through it on June 1, AD 305, and that the gate had a defensive double-door layout. It was both architecture and intimidation: a visitor moved through a controlled military-style threshold before reaching the emperor’s inner world.</p>
+        <p><strong>Why important:</strong> This is where Split’s story starts: not as a normal medieval town, but as an emperor’s fortified retirement compound that later became a refugee city.</p>
+        <ul><li>Built into a palace completed around AD 305.</li><li>The Roman name was Porta septemtrionalis, the northern gate.</li><li>Its defensive entry corridor functioned like a kill zone if attackers breached the outer doors.</li><li>Later churches and medieval structures grew around it, turning imperial architecture into city fabric.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>Diocletian’s reign is tied to the Great Persecution of Christians. The nearby Christian community of Salona suffered arrests, torture, and executions. Centuries later, people fleeing the collapse of Salona would shelter behind these very walls.</p>
+      </details>
+      
+      <div class="battle">
+        <div class="battle-title">⚔️ Strategic Scene: Gate Defense of a Roman Palace</div>
+        <table><tr><th>Era</th><td>AD 305 and later late-antique crisis</td></tr><tr><th>Attacker</th><td>Raiders, rebels, or urban mobs in later crisis periods</td></tr><tr><th>Defender</th><td>Palace garrison and controlled-access guards</td></tr><tr><th>Groups</th><td>2 main groups: attackers outside the wall; defenders inside gate/towers</td></tr><tr><th>Units</th><td>Infantry at doors, archers/javelins from walls, heavy doors, choke-point defenders</td></tr><tr><th>Terrain</th><td>Narrow gate passage, high walls, limited attacker frontage</td></tr><tr><th>Outcome</th><td>The gate was designed to make assault expensive even before attackers reached the palace interior.</td></tr><tr><th>Impact</th><td>The architecture explains why refugees later chose the palace as a survival shell.</td></tr></table>
+      </div>
+    
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>Start here, then immediately look left/right along the wall. It helps your brain understand the palace as a rectangle, not random alleys.</p>
+        <p class="next"><strong>Next:</strong> Gregory of Nin Statue – 1 min</p>
+      </details>
+    </article>
+    
+    <article class="card core-palace" id="stop2" data-zone="Core Palace">
+      <div class="card-head">
+        <div class="num">2</div>
+        <div>
+          <div class="zone">Core Palace · 1 min</div>
+          <h2>Gregory of Nin Statue</h2>
+          <p class="vibe">🧙 giant statue · 🇭🇷 identity · 📸 easy photo</p>
+        </div>
+      </div>
+      <p class="summary">A huge bronze statue of a bishop who became a symbol of Croatian language, religious autonomy, and local identity.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Gregory%20of%20Nin%20Statue%20Split" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Gregory%20of%20Nin%20Statue%20Split&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Rub the shiny toe if you want the local tourist ritual. Then look back toward the Golden Gate for the best palace-wall perspective.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>Gregory of Nin was a medieval bishop remembered for supporting the use of the Slavic language in church services instead of only Latin. The statue is by Ivan Meštrović, one of Croatia’s most important sculptors. It is not Roman, but it adds the next layer: local Slavic/Croatian identity growing on top of the Roman shell.</p>
+        <p><strong>Why important:</strong> This stop shows that Split is not only Roman. It is Roman stone repurposed by Christian, Croatian, Venetian, Austrian, Yugoslav, and modern Croatian layers.</p>
+        <ul><li>The statue was moved during the 20th century and is now just outside the Golden Gate.</li><li>The polished toe is a modern luck ritual.</li><li>It connects medieval church politics to national identity.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>Language and worship were never just culture; they were power. Control over church language meant control over identity, obedience, and political legitimacy.</p>
+      </details>
+      
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>Fast photo stop. Do not overthink it unless you want the Croatian identity chapter.</p>
+        <p class="next"><strong>Next:</strong> North Wall – 1 min</p>
+      </details>
+    </article>
+    
+    <article class="card core-palace" id="stop3" data-zone="Core Palace">
+      <div class="card-head">
+        <div class="num">3</div>
+        <div>
+          <div class="zone">Core Palace · 1–2 min</div>
+          <h2>North Wall and Defensive Towers</h2>
+          <p class="vibe">🧱 walls · ⚔️ collapse survival · 🛡️ fortress city</p>
+        </div>
+      </div>
+      <p class="summary">The best spot to feel that the palace was part villa, part fortress, part Roman military camp.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Diocletian%20Palace%20North%20Wall%20Split" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Diocletian%20Palace%20North%20Wall%20Split&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Follow the wall line and imagine no cafes, no souvenir stands — just guards, towers, and stone mass.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>Diocletian’s Palace was laid out like a fortified Roman camp: rectangular plan, gates on each side, towers, and internal streets. UNESCO describes the ruins as woven throughout Split’s historical center, not isolated inside a museum. That matters: the city is literally living inside the Roman fortification plan.</p>
+        <p><strong>Why important:</strong> This wall explains how an emperor’s private stronghold could become the seed of a city after regional collapse.</p>
+        <ul><li>The palace had four principal gates: Golden, Silver, Iron, and Bronze.</li><li>The plan resembles a castrum, a Roman military-camp grid.</li><li>Half the complex is often interpreted as imperial residence, with the other half serving support and military functions.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>When Salona weakened and was eventually abandoned in the early medieval period, survival meant walls. Refugees did not pick the palace because it was beautiful; they picked it because stone walls beat open ground.</p>
+      </details>
+      
+      <div class="battle">
+        <div class="battle-title">⚔️ Total War Scene: Refugees Behind the Palace Walls</div>
+        <table><tr><th>Era</th><td>7th century regional collapse</td></tr><tr><th>Attacker</th><td>Avar and Slavic pressure across Dalmatia; exact local assault details are debated</td></tr><tr><th>Defender</th><td>Romanized/Christian refugees from Salona and surrounding settlements</td></tr><tr><th>Groups</th><td>3 broad groups: raiders/migrating war bands; displaced civilians; surviving local elites/clergy</td></tr><tr><th>Units</th><td>Not a set-piece army battle — think raids, flight, local militia, fortified refuge</td></tr><tr><th>Terrain</th><td>Open coastal settlement vs. fortified imperial palace walls</td></tr><tr><th>Outcome</th><td>The old palace became the defensible nucleus of medieval Split.</td></tr><tr><th>Impact</th><td>A retirement palace became a living city because insecurity made fortifications more valuable than imperial luxury.</td></tr></table>
+      </div>
+    
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>This is a good “reset your mental map” point before entering the maze.</p>
+        <p class="next"><strong>Next:</strong> Iron Gate or palace alley loop – 4–6 min</p>
+      </details>
+    </article>
+    
+    <article class="card core-palace" id="stop4" data-zone="Core Palace">
+      <div class="card-head">
+        <div class="num">4</div>
+        <div>
+          <div class="zone">Core Palace · 2–4 min wandering</div>
+          <h2>Cardo and Decumanus Street Grid</h2>
+          <p class="vibe">🧭 Roman grid · 🏙️ living archaeology</p>
+        </div>
+      </div>
+      <p class="summary">The palace’s internal streets preserve Roman planning logic: movement, hierarchy, ceremony, and control.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Diocletian%20Palace%20Cardo%20Decumanus%20Split" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Diocletian%20Palace%20Cardo%20Decumanus%20Split&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Notice how some lanes feel straight and axial, then suddenly medieval additions make them tight and irregular.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>Roman military camps and planned cities often used two main axes: cardo and decumanus. Diocletian’s Palace adapted this logic into an imperial compound. Later residents subdivided rooms, blocked passages, opened shops, and added chapels, turning planned imperial order into a dense medieval organism.</p>
+        <p><strong>Why important:</strong> You are walking through urban evolution in real time: Roman power planning becomes medieval survival planning becomes modern tourism.</p>
+        <ul><li>The palace was not a ruin later discovered; it was continuously reused.</li><li>Roman geometry survives under medieval improvisation.</li><li>This is why Split feels like a maze but still has a hidden order.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>Dense medieval reuse meant fire risk, disease, waste, crowding, and poverty inside ancient prestige architecture.</p>
+      </details>
+      
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>Let yourself get slightly lost, but use the Peristyle as your anchor.</p>
+        <p class="next"><strong>Next:</strong> Iron Gate – 2–3 min</p>
+      </details>
+    </article>
+    
+    <article class="card core-palace" id="stop5" data-zone="Core Palace">
+      <div class="card-head">
+        <div class="num">5</div>
+        <div>
+          <div class="zone">Core Palace · 4–6 min</div>
+          <h2>Iron Gate / Porta Ferrea</h2>
+          <p class="vibe">🚪 Roman gate · 🕰️ city clock · ⚖️ transition point</p>
+        </div>
+      </div>
+      <p class="summary">The western gate shows the transformation from Roman palace to medieval civic city.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Iron%20Gate%20Split%20Croatia" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Iron%20Gate%20Split%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Look for the layered architecture around the gate and the clock tower area — Roman base, medieval city growth, later civic identity.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>The Iron Gate was one of the original palace gates. It became a key connection between the Roman core and medieval expansion. As Split grew, this gate stopped feeling like an imperial boundary and became a daily city passage.</p>
+        <p><strong>Why important:</strong> This is one of the best places to understand Split’s core theme: the palace did not die; ordinary people colonized it.</p>
+        <ul><li>The west side connected the palace to expanding medieval urban life.</li><li>Gate areas often became commercial and civic chokepoints.</li><li>Religious and civic buildings clustered near palace passages over time.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>Every gate controlled movement: refugees, soldiers, merchants, disease, tax collectors, criminals, and clergy all passed through. Gates were freedom and surveillance at the same time.</p>
+      </details>
+      
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>Good connector to People’s Square for a coffee break.</p>
+        <p class="next"><strong>Next:</strong> People’s Square / Pjaca – 1 min</p>
+      </details>
+    </article>
+    
+    <div id="medieval-city" class="section-anchor"><h2>Medieval / Venetian City</h2><p>How the Roman palace became a civic town, trade hub, and Adriatic frontier city.</p></div>
+    <article class="card medieval-city" id="stop6" data-zone="Medieval City">
+      <div class="card-head">
+        <div class="num">6</div>
+        <div>
+          <div class="zone">Medieval City · 1 min</div>
+          <h2>People’s Square / Pjaca</h2>
+          <p class="vibe">🏛️ medieval civic life · 🍷 pause · ⚖️ power politics</p>
+        </div>
+      </div>
+      <p class="summary">Split’s medieval public living room — where the city’s non-imperial identity comes forward.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=People%27s%20Square%20Split%20Croatia%20Pjaca" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=People%27s%20Square%20Split%20Croatia%20Pjaca&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Pause and imagine legal announcements, trade, gossip, punishment, and elite families using the square as a stage.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>As Split outgrew the palace’s original Roman function, civic life shifted into squares like Pjaca. This is where the city feels less like Diocletian’s compound and more like a medieval Adriatic commune shaped by local nobles, church authority, Venetian influence, and trade.</p>
+        <p><strong>Why important:</strong> If the Peristyle is imperial theater, Pjaca is civic theater — the people, merchants, courts, and urban elites.</p>
+        <ul><li>Pjaca means square/marketplace in local usage.</li><li>It reflects the medieval city expanding beyond the strict Roman ceremonial core.</li><li>Nearby architecture shows Gothic, Renaissance, and Baroque layers.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>Medieval justice could be public and harsh: humiliation, confiscation, imprisonment, exile, and executions. Plague years could turn a public square into a rumor mill of fear.</p>
+      </details>
+      
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>Coffee stop candidate. You can sit without breaking the historical route.</p>
+        <p class="next"><strong>Next:</strong> Fruit Square – 2 min</p>
+      </details>
+    </article>
+    
+    <article class="card medieval-city" id="stop7" data-zone="Medieval City">
+      <div class="card-head">
+        <div class="num">7</div>
+        <div>
+          <div class="zone">Medieval City · 2 min</div>
+          <h2>Fruit Square / Voćni Trg</h2>
+          <p class="vibe">🍊 market square · 🦁 Venice · 🏰 tower</p>
+        </div>
+      </div>
+      <p class="summary">A compact square that points toward the Venetian and maritime layer of Split.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Fruit%20Square%20Split%20Croatia" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Fruit%20Square%20Split%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Look for Venetian-style elements and defensive urban architecture around the square.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>Dalmatia was deeply shaped by Venice, which dominated much of the Adriatic for centuries. Split’s Roman and Croatian layers were overlaid with Venetian law, trade networks, architecture, and naval priorities.</p>
+        <p><strong>Why important:</strong> This stop adds the Adriatic empire layer: Split as a port in a contested sea, not just a Roman relic.</p>
+        <ul><li>Venetian power across Dalmatia was maritime, commercial, and military.</li><li>The Venetian lion of St. Mark appears across Dalmatian towns.</li><li>Small squares like this were practical trade nodes, not just pretty spaces.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>Venetian-Ottoman rivalry made Dalmatia a frontier. Raids, piracy, fortification, taxation, and forced loyalty shaped life even when no battle happened in the square itself.</p>
+      </details>
+      
+      <div class="battle">
+        <div class="battle-title">⚔️ Strategic Scene: Adriatic Frontier Pressure</div>
+        <table><tr><th>Era</th><td>15th–17th centuries</td></tr><tr><th>Attacker</th><td>Ottoman frontier forces, raiders, corsairs, and rival maritime powers</td></tr><tr><th>Defender</th><td>Venetian-controlled Dalmatian towns, local militias, fortresses, and fleets</td></tr><tr><th>Groups</th><td>4 groups: Venetian officials; local Dalmatian citizens; Ottoman frontier forces; sea raiders/privateers</td></tr><tr><th>Units</th><td>Town militia, garrison infantry, light cavalry in hinterland, galleys/corsairs at sea</td></tr><tr><th>Terrain</th><td>Walled coastal towns, islands, passes, sea lanes</td></tr><tr><th>Outcome</th><td>No single battle here; Split’s urban life militarized around a wider frontier system.</td></tr><tr><th>Impact</th><td>Explains why nearby Klis mattered so much: whoever held the pass could threaten the coast.</td></tr></table>
+      </div>
+    
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>Good photo stop. Also good place to talk about pirates and border warfare.</p>
+        <p class="next"><strong>Next:</strong> Republic Square / Prokurative – 3 min</p>
+      </details>
+    </article>
+    
+    <article class="card medieval-city" id="stop8" data-zone="Medieval City">
+      <div class="card-head">
+        <div class="num">8</div>
+        <div>
+          <div class="zone">Medieval City · 3 min</div>
+          <h2>Republic Square / Prokurative</h2>
+          <p class="vibe">🇮🇹 Venetian look · 🎭 grand plaza · 🌅 pretty detour</p>
+        </div>
+      </div>
+      <p class="summary">A later Venetian-inspired plaza that shows Split’s cultural pull toward the Adriatic-Italian world.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Republic%20Square%20Prokurative%20Split" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Republic%20Square%20Prokurative%20Split&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Use this as a visual contrast: wide, theatrical, Mediterranean — totally different from the tight Roman palace grid.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>The square is much later than Diocletian’s Palace, but it reflects the long Venetian and Italianate influence on the Dalmatian coast. Split’s identity was shaped by language, trade, architecture, and empire.</p>
+        <p><strong>Why important:</strong> It reminds you that Split did not freeze in AD 305. It kept absorbing empires.</p>
+        <ul><li>The name Prokurative evokes Venetian Procuratie-style architecture.</li><li>It is one of Split’s most elegant public spaces.</li><li>Great transition stop before returning toward the Riva.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>Dalmatia’s identity was contested for centuries. Venetian, Austrian, French, Italian, Yugoslav, and Croatian political projects all left marks and tensions.</p>
+      </details>
+      
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>Great place to take a wide photo and then walk back toward the waterfront.</p>
+        <p class="next"><strong>Next:</strong> Marmont Street – 2 min</p>
+      </details>
+    </article>
+    
+    <article class="card modern-layers" id="stop9" data-zone="Modern Layers">
+      <div class="card-head">
+        <div class="num">9</div>
+        <div>
+          <div class="zone">Modern Layers · 2 min</div>
+          <h2>Marmont Street</h2>
+          <p class="vibe">🇫🇷 Napoleon layer · 🛍️ easy connector</p>
+        </div>
+      </div>
+      <p class="summary">A simple walking connector with a bigger story: Napoleon’s short but disruptive rule in Dalmatia.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Marmontova%20Street%20Split" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Marmontova%20Street%20Split&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Treat it as a transition from medieval/Adriatic Split into modern European empire politics.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>Marmont Street is named after Auguste de Marmont, a French marshal tied to Napoleonic administration in Dalmatia. French rule was brief but brought administrative and infrastructure reforms, then gave way to Austrian dominance.</p>
+        <p><strong>Why important:</strong> This stop prevents the guide from becoming only Roman fantasy. Split also lived through modern imperial reshuffling.</p>
+        <ul><li>Dalmatia moved through Venetian, French, Austrian, Yugoslav, and Croatian political systems.</li><li>The Napoleonic period helped modernize administration but came through occupation and war.</li><li>Street names preserve political memory.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>Napoleonic rule meant military occupation, conscription pressure, elite displacement, and a new empire deciding local futures.</p>
+      </details>
+      
+      <div class="battle">
+        <div class="battle-title">⚔️ Strategic Scene: Napoleonic Dalmatia</div>
+        <table><tr><th>Era</th><td>Early 1800s</td></tr><tr><th>Attacker</th><td>French imperial administration and military power</td></tr><tr><th>Defender</th><td>Old Venetian/Austrian-linked elites and local communities adapting under pressure</td></tr><tr><th>Groups</th><td>3 groups: French military administrators; local Dalmatian elites; Austrian/anti-French rivals</td></tr><tr><th>Units</th><td>Occupation garrisons, administrators, road builders, local conscripts</td></tr><tr><th>Terrain</th><td>Ports, mountain roads, island routes, imperial supply lines</td></tr><tr><th>Outcome</th><td>French control was temporary, but it altered administration and infrastructure.</td></tr><tr><th>Impact</th><td>Shows how Split’s strategic port location kept attracting empires long after Rome.</td></tr></table>
+      </div>
+    
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>Do not linger long unless you want shopping. Use it as a chapter marker.</p>
+        <p class="next"><strong>Next:</strong> Riva Waterfront – 5 min</p>
+      </details>
+    </article>
+    
+    <div id="waterfront" class="section-anchor"><h2>Waterfront + Sea Gate</h2><p>Riva, port logic, Bronze Gate, and the shift from harbor to palace underworld.</p></div>
+    <article class="card waterfront" id="stop10" data-zone="Waterfront">
+      <div class="card-head">
+        <div class="num">10</div>
+        <div>
+          <div class="zone">Waterfront · 5 min</div>
+          <h2>Riva Waterfront</h2>
+          <p class="vibe">🌊 harbor · 🍻 reset point · 🚢 sea power</p>
+        </div>
+      </div>
+      <p class="summary">Split’s social front porch today — but historically the seaward side of a strategic palace-port.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Riva%20Split%20Croatia" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Riva%20Split%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Face the water and imagine ships supplying the palace, Venetian vessels, Austrian naval presence, WWII pressure, and tourist ferries layered together.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>The southern side of the palace faced the sea. Over time, the waterfront became Split’s main promenade and social stage. Ports bring wealth but also danger: armies, disease, political control, and naval strategy.</p>
+        <p><strong>Why important:</strong> Without the sea, Split’s history makes no sense. The Adriatic made it valuable.</p>
+        <ul><li>Best practical rest point on the route.</li><li>The Bronze Gate is right off the Riva and leads into the cellars.</li><li>The waterfront ties Roman logistics to Venetian and modern maritime life.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>Strategic ports are targets. Split experienced occupation, bombing, militarization, and political violence in the 20th century.</p>
+      </details>
+      
+      <div class="battle">
+        <div class="battle-title">⚔️ Strategic Scene: Control of a Port City</div>
+        <table><tr><th>Era</th><td>Roman to WWII</td></tr><tr><th>Attacker</th><td>Any power needing Adriatic control: pirates, Venice, Austria, Axis/Allied forces</td></tr><tr><th>Defender</th><td>Local authorities, garrisons, naval forces, civilians</td></tr><tr><th>Groups</th><td>4 recurring groups: naval power; city government; merchant/civilian population; occupying/resisting forces</td></tr><tr><th>Units</th><td>Ships, port guards, artillery in later eras, police/partisans in the 20th century</td></tr><tr><th>Terrain</th><td>Harbor, palace walls, narrow streets, island approaches</td></tr><tr><th>Outcome</th><td>The waterfront repeatedly shifted from trade space to strategic asset.</td></tr><tr><th>Impact</th><td>Explains why Split is beautiful and militarily valuable at the same time.</td></tr></table>
+      </div>
+    
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>Get water, coffee, or a drink here. This is the ideal relationship-friendly pause.</p>
+        <p class="next"><strong>Next:</strong> Bronze Gate – 1 min</p>
+      </details>
+    </article>
+    
+    <article class="card core-palace" id="stop11" data-zone="Core Palace">
+      <div class="card-head">
+        <div class="num">11</div>
+        <div>
+          <div class="zone">Core Palace · 1 min</div>
+          <h2>Bronze Gate / Southern Gate</h2>
+          <p class="vibe">🚪 sea entrance · 🏛️ logistics · 🐉 GOT route</p>
+        </div>
+      </div>
+      <p class="summary">The seaward gate into the substructures — less ceremonial than the Golden Gate, but more atmospheric.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Bronze%20Gate%20Split%20Croatia" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Bronze%20Gate%20Split%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Enter from the Riva and notice how the city suddenly becomes underground Roman stone.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>The Bronze Gate connected the palace to the sea-facing side and the substructures under the imperial apartments. It was practical: supplies, service movement, and controlled access from the waterfront.</p>
+        <p><strong>Why important:</strong> This is where you feel the palace as infrastructure: food, storage, servants, guards, and supply lines.</p>
+        <ul><li>Southern entry from the Riva.</li><li>Leads directly toward the cellars.</li><li>Shows the palace as a working logistical complex, not just a residence.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>Sea access was survival and vulnerability. Ships could bring grain, soldiers, plague, news, refugees, or enemies.</p>
+      </details>
+      
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>Best dramatic re-entry into the palace after a Riva drink.</p>
+        <p class="next"><strong>Next:</strong> Diocletian’s Cellars – immediate</p>
+      </details>
+    </article>
+    
+    <article class="card core-palace" id="stop12" data-zone="Core Palace">
+      <div class="card-head">
+        <div class="num">12</div>
+        <div>
+          <div class="zone">Core Palace · Immediate</div>
+          <h2>Diocletian’s Cellars / Palace Basements</h2>
+          <p class="vibe">🐉 Game of Thrones · 🏛️ engineering · 💀 dark underground</p>
+        </div>
+      </div>
+      <p class="summary">The best-preserved Roman substructures in Split and the strongest Game of Thrones stop.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Diocletian%27s%20Cellars%20Split" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Diocletian%27s%20Cellars%20Split&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Look up at the vaults. The basement layout mirrors the emperor’s apartments above, preserving the vanished palace plan.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>The cellars supported the imperial residential level. Later debris and reuse preserved them, which is why historians can reconstruct the layout above. Today they are one of the clearest places to understand the palace as an engineered Roman mega-structure.</p>
+        <p><strong>Why important:</strong> This stop converts abstract history into physical scale. You can feel the weight of imperial architecture.</p>
+        <ul><li>Used as a major Game of Thrones filming location for Daenerys-related scenes.</li><li>Vaulted substructures preserved the imperial apartment footprint.</li><li>Now used for shops, exhibits, and passageways.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>Underground spaces became storage, dumping areas, shelter, and survival zones. In war or plague, stone basements are not romantic — they are places people hide, store bodies/goods, and endure fear.</p>
+      </details>
+      
+      <div class="battle">
+        <div class="battle-title">⚔️ Scene: Palace Underworld</div>
+        <table><tr><th>Era</th><td>Roman through medieval reuse</td></tr><tr><th>Attacker</th><td>Time, collapse, poverty, war, and urban overcrowding</td></tr><tr><th>Defender</th><td>Stone engineering and reuse by residents</td></tr><tr><th>Groups</th><td>3 groups: imperial builders; medieval/early-modern residents; modern archaeologists/tourists</td></tr><tr><th>Units</th><td>Not a battle of armies — a battle of preservation vs. decay</td></tr><tr><th>Terrain</th><td>Vaulted underground chambers</td></tr><tr><th>Outcome</th><td>The cellars survived because they were reused and filled, not because they were preserved as a museum.</td></tr><tr><th>Impact</th><td>Their survival lets you read the lost imperial palace above.</td></tr></table>
+      </div>
+    
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>If you only pay for one interior Roman thing, this is the one.</p>
+        <p class="next"><strong>Next:</strong> Vestibule – 2 min</p>
+      </details>
+    </article>
+    
+    <article class="card core-palace" id="stop13" data-zone="Core Palace">
+      <div class="card-head">
+        <div class="num">13</div>
+        <div>
+          <div class="zone">Core Palace · 2 min</div>
+          <h2>Vestibule</h2>
+          <p class="vibe">👑 imperial theater · 🎶 acoustics · 🏛️ drama</p>
+        </div>
+      </div>
+      <p class="summary">A dramatic circular chamber that prepared visitors for the emperor’s private world.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Vestibule%20Split%20Croatia%20Diocletian%20Palace" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Vestibule%20Split%20Croatia%20Diocletian%20Palace&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Stand in the middle and look up. Architecture is being used like a psychological weapon.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>The Vestibule connected public ceremonial space to the imperial apartments. Its shape, height, and acoustics created awe. Roman imperial architecture was not neutral — it trained your body to feel small before power.</p>
+        <p><strong>Why important:</strong> This is the emotional doorway into Diocletian’s personality cult and imperial image.</p>
+        <ul><li>Famous for acoustics and occasional singing.</li><li>A threshold between public palace and imperial residence.</li><li>Shows how Roman architecture staged hierarchy.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>Behind the beauty was a system of absolute hierarchy. The emperor’s favor meant wealth and survival; displeasure could mean exile, confiscation, torture, or death.</p>
+      </details>
+      
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>Pause if singers are performing. It is touristy but genuinely cool.</p>
+        <p class="next"><strong>Next:</strong> Peristyle – 1 min</p>
+      </details>
+    </article>
+    
+    <article class="card core-palace" id="stop14" data-zone="Core Palace">
+      <div class="card-head">
+        <div class="num">14</div>
+        <div>
+          <div class="zone">Core Palace · 1 min</div>
+          <h2>Peristyle</h2>
+          <p class="vibe">👑 imperial court · 🏛️ Roman columns · ⭐ heart of Split</p>
+        </div>
+      </div>
+      <p class="summary">The ceremonial heart of Diocletian’s Palace — the best single spot to understand emperor-as-god performance.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Peristyle%20Split%20Croatia" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Peristyle%20Split%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Sit on the steps. Imagine officials, guards, petitioners, religious ceremony, and the emperor appearing above the crowd.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>The Peristyle was the palace’s main ceremonial court. Diocletian’s era was one of imperial crisis management: civil wars, inflation, external threats, and administrative strain. His answer was the Tetrarchy — rule by multiple emperors — and a more formal, distant, godlike imperial style.</p>
+        <p><strong>Why important:</strong> This is where Roman politics becomes theater. Diocletian’s reforms helped stabilize the empire but also hardened imperial authority.</p>
+        <ul><li>Symbolic heart of Split for roughly 1,700 years.</li><li>Central ceremonial axis of the palace.</li><li>Often active with music and crowds today.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>The same system that produced order also produced persecution. The emperor’s sacred image made dissent dangerous. Christians who refused imperial religious expectations could be treated as threats to state order.</p>
+      </details>
+      
+      <div class="battle">
+        <div class="battle-title">⚔️ Total War Campaign Card: Diocletian Stabilizes the Empire</div>
+        <table><tr><th>Era</th><td>AD 284–305</td></tr><tr><th>Attacker</th><td>External enemies, usurpers, inflation, administrative breakdown</td></tr><tr><th>Defender</th><td>Diocletian and the Tetrarchic imperial system</td></tr><tr><th>Groups</th><td>5 groups: senior emperors; junior emperors; frontier armies; tax/administrative bureaucracy; religious minorities under pressure</td></tr><tr><th>Units</th><td>Roman field armies, frontier troops, cavalry, administrators, tax collectors, palace guard</td></tr><tr><th>Terrain</th><td>Empire-wide: Danube, Persia, Egypt, Balkans, Italy, North Africa</td></tr><tr><th>Outcome</th><td>Short-term stabilization and stronger imperial control.</td></tr><tr><th>Impact</th><td>Diocletian helped save the empire’s structure, but his harsher centralized system foreshadowed the late Roman world.</td></tr></table>
+      </div>
+    
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>This is the stop to actually sit and talk history for 5 minutes.</p>
+        <p class="next"><strong>Next:</strong> Temple of Jupiter – 1 min</p>
+      </details>
+    </article>
+    
+    <article class="card core-palace" id="stop15" data-zone="Core Palace">
+      <div class="card-head">
+        <div class="num">15</div>
+        <div>
+          <div class="zone">Core Palace · 1 min</div>
+          <h2>Temple of Jupiter / Baptistery</h2>
+          <p class="vibe">⚡ pagan Rome · ✝️ reversal · 🗿 sphinx</p>
+        </div>
+      </div>
+      <p class="summary">A pagan temple later transformed into a Christian baptistery — one of the best religion-flip stops in the palace.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Temple%20of%20Jupiter%20Split%20Croatia" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Temple%20of%20Jupiter%20Split%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Look for Egyptian sphinx imagery and the tight sacred-space feeling.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>The temple was dedicated to Jupiter, the supreme Roman god associated with state authority. Diocletian styled himself in relation to Jupiter, using religion to reinforce imperial legitimacy. Later Christians repurposed this pagan sacred space as a baptistery.</p>
+        <p><strong>Why important:</strong> It captures one of the biggest shifts in world history: the Roman state moving from persecuting Christianity to being transformed by it.</p>
+        <ul><li>Excellent example of pagan-to-Christian architectural reuse.</li><li>Nearby sphinxes reflect Diocletian’s use of Egyptian imperial symbolism.</li><li>The temple is small but symbolically huge.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>The irony is savage: the world of Jupiter and imperial sacrifice gave way to the faith Diocletian tried to crush.</p>
+      </details>
+      
+      <div class="battle">
+        <div class="battle-title">⚔️ Culture War Card: Pagan State vs. Christian Community</div>
+        <table><tr><th>Era</th><td>Late 3rd–4th century</td></tr><tr><th>Attacker</th><td>Imperial religious enforcement under Diocletian’s system</td></tr><tr><th>Defender</th><td>Christian communities, including Salona’s church</td></tr><tr><th>Groups</th><td>4 groups: imperial officials; pagan priestly/state cult structures; Christian clergy; ordinary believers</td></tr><tr><th>Units</th><td>Edicts, arrests, confiscations, executions, underground worship networks</td></tr><tr><th>Terrain</th><td>Courts, temples, churches, homes, prisons</td></tr><tr><th>Outcome</th><td>Persecution failed long-term; Christianity eventually became dominant in the empire.</td></tr><tr><th>Impact</th><td>The converted temple makes that reversal visible in stone.</td></tr></table>
+      </div>
+    
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>Easy to miss because it is small. Worth it if open.</p>
+        <p class="next"><strong>Next:</strong> Cathedral of Saint Domnius – 1 min</p>
+      </details>
+    </article>
+    
+    <article class="card core-palace" id="stop16" data-zone="Core Palace">
+      <div class="card-head">
+        <div class="num">16</div>
+        <div>
+          <div class="zone">Core Palace · 1 min</div>
+          <h2>Cathedral of Saint Domnius and Bell Tower</h2>
+          <p class="vibe">⛪ emperor’s tomb · 💀 ultimate revenge · 🔔 view</p>
+        </div>
+      </div>
+      <p class="summary">Originally Diocletian’s mausoleum. Later: a cathedral honoring the Christian world he persecuted.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Cathedral%20of%20Saint%20Domnius%20Split" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Cathedral%20of%20Saint%20Domnius%20Split&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Think about the power reversal: the emperor’s tomb converted into a church.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>UNESCO notes that the medieval cathedral reused material from Diocletian’s ancient mausoleum. Saint Domnius became the patron saint of Split, traditionally associated with the Christian community persecuted under Diocletian.</p>
+        <p><strong>Why important:</strong> This may be the most poetic historical reversal in Split: Diocletian built a tomb to project eternity, but history gave the space to his victims’ religion.</p>
+        <ul><li>Often described as one of the oldest cathedral buildings still in use in its original structure.</li><li>The bell tower gives one of the best views over the palace grid.</li><li>The emperor’s body is gone; the Christian church remains.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>The persecutor’s mausoleum became a cathedral. That is not just irony — it is historical humiliation across centuries.</p>
+      </details>
+      
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>Climb the tower if heat/energy allows. Skip if crowds are bad.</p>
+        <p class="next"><strong>Next:</strong> Silver Gate – 2 min</p>
+      </details>
+    </article>
+    
+    <article class="card core-palace" id="stop17" data-zone="Core Palace">
+      <div class="card-head">
+        <div class="num">17</div>
+        <div>
+          <div class="zone">Core Palace · 2 min</div>
+          <h2>Silver Gate / Eastern Gate</h2>
+          <p class="vibe">🚪 eastern gate · 🛒 market · 🧭 exit point</p>
+        </div>
+      </div>
+      <p class="summary">The eastern Roman gate connecting the palace to the market side of the city.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Silver%20Gate%20Split%20Croatia" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Silver%20Gate%20Split%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Notice how quickly the sacred/imperial core turns back into daily life.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>The Silver Gate was another original palace gate, later absorbed into the living city. Gate zones are always practical: goods, food, people, taxes, gossip, and disease move through them.</p>
+        <p><strong>Why important:</strong> It reinforces the palace as a functioning fortified organism with controlled access on all sides.</p>
+        <ul><li>Eastern palace gate.</li><li>Good exit toward Pazar market.</li><li>Part of the four-gate Roman defensive plan.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>In crisis, gates decide who gets inside and who is left outside. That matters during raids, plague, famine, and war.</p>
+      </details>
+      
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>Use this to pop out to the market for fruit/water.</p>
+        <p class="next"><strong>Next:</strong> Pazar Market – 1 min</p>
+      </details>
+    </article>
+    
+    <article class="card local-life" id="stop18" data-zone="Local Life">
+      <div class="card-head">
+        <div class="num">18</div>
+        <div>
+          <div class="zone">Local Life · 1 min</div>
+          <h2>Pazar / Green Market</h2>
+          <p class="vibe">🍒 local market · 🧂 food · 🧬 living city</p>
+        </div>
+      </div>
+      <p class="summary">The living-city proof: Split is not just monuments — people still shop and move around the palace walls.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Green%20Market%20Split%20Croatia%20Pazar" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Green%20Market%20Split%20Croatia%20Pazar&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Notice how the market hugs the old gate area. That is not random; gates create markets.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>Markets naturally form near gates because traffic concentrates there. Pazar continues the long logic of exchange at the city edge: food, local produce, trade, and daily social contact.</p>
+        <p><strong>Why important:</strong> This keeps the guide grounded. Great history cities are not dead — they are used.</p>
+        <ul><li>Best quick fruit/water stop.</li><li>Shows how ancient infrastructure still shapes modern behavior.</li><li>Market zones historically doubled as information networks.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>In older centuries, markets could become survival zones during shortage, siege, plague, or blockade. Food access was politics.</p>
+      </details>
+      
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>Grab water here before Marjan or more wandering.</p>
+        <p class="next"><strong>Next:</strong> Let Me Pass Street / alley loop – optional</p>
+      </details>
+    </article>
+    
+    <article class="card hidden-alley" id="stop19" data-zone="Hidden Alley">
+      <div class="card-head">
+        <div class="num">19</div>
+        <div>
+          <div class="zone">Hidden Alley · 5–10 min optional</div>
+          <h2>Let Me Pass Street / Pusti me proć</h2>
+          <p class="vibe">🧭 tiny alley · 🏙️ medieval compression · 😂 weird stop</p>
+        </div>
+      </div>
+      <p class="summary">One of those tiny Split alley moments that makes the city feel like a medieval pressure cooker.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Let%20Me%20Pass%20Street%20Split%20Croatia" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Let%20Me%20Pass%20Street%20Split%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Find the narrow passage and imagine living in a dense city where privacy, sanitation, and space were luxuries.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>As people colonized the palace shell, spaces were subdivided and repurposed. Narrow lanes formed where Roman order met medieval improvisation.</p>
+        <p><strong>Why important:</strong> Big history is not only emperors. It is also how normal people squeezed life into old structures.</p>
+        <ul><li>Good quick hidden-gem stop.</li><li>Shows urban density more than elite architecture.</li><li>Fun contrast after major monuments.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>Dense old cities meant sewage, disease, fire, domestic violence, poverty, and almost no private space.</p>
+      </details>
+      
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>This is a funny stop to keep the tour from feeling like homework.</p>
+        <p class="next"><strong>Next:</strong> Riva or Marjan choice</p>
+      </details>
+    </article>
+    
+    <article class="card viewpoint" id="stop20" data-zone="Viewpoint">
+      <div class="card-head">
+        <div class="num">20</div>
+        <div>
+          <div class="zone">Viewpoint · 20–25 min from Riva</div>
+          <h2>Marjan Hill / Vidilica Viewpoint</h2>
+          <p class="vibe">🌄 view · ❤️ partner-friendly · 🧊 heat escape</p>
+        </div>
+      </div>
+      <p class="summary">The best view for understanding Split’s geography: palace, harbor, islands, mountains, and defensive logic.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Vidilica%20Split%20Croatia" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Vidilica%20Split%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>From above, trace the palace rectangle, the harbor, and the routes toward Salona and Klis.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>Marjan has served as a lookout, refuge, and green escape for Split. The viewpoint helps you understand why Split exists: protected harbor, nearby Roman Salona, mountain passes, island routes.</p>
+        <p><strong>Why important:</strong> History is geography. From here, the palace stops being isolated and becomes part of a strategic coastline.</p>
+        <ul><li>Best late afternoon/sunset option.</li><li>Great relationship-friendly scenic stop.</li><li>Makes the route visually click.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>High ground means warning and control. In violent centuries, seeing ships or troops early could mean survival.</p>
+      </details>
+      
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>Do not do this in peak heat unless you are feeling strong. Sunset is the move.</p>
+        <p class="next"><strong>Next:</strong> Back to Riva or dinner</p>
+      </details>
+    </article>
+    
+    <article class="card cooldown" id="stop21" data-zone="Cooldown">
+      <div class="card-head">
+        <div class="num">21</div>
+        <div>
+          <div class="zone">Cooldown · 15–20 min from Riva</div>
+          <h2>Bačvice Beach</h2>
+          <p class="vibe">🏖️ cooldown · 🏐 picigin · 🍹 easy finish</p>
+        </div>
+      </div>
+      <p class="summary">A beach cooldown after the empire-collapse-war tour.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Bacvice%20Beach%20Split%20Croatia" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Bacvice%20Beach%20Split%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Shallow water, locals, swimmers, and picigin culture.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>Bačvice is famous for picigin, a local shallow-water ball game associated with Split’s beach identity. Not every stop needs blood; this is Split as lived pleasure.</p>
+        <p><strong>Why important:</strong> Travel companion rule: after brutal history, give people a soft landing.</p>
+        <ul><li>Best chill ending if Marjan feels like too much.</li><li>Easy from the old town.</li><li>Good reset after walking stone alleys.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>The dark-history angle here is contrast. You just walked through persecution, collapse, siege logic, and empire. Now sit in the water.</p>
+      </details>
+      
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>If Tobi wants chill over more uphill walking, choose this.</p>
+        <p class="next"><strong>Next:</strong> Dinner/drinks</p>
+      </details>
+    </article>
+    
+    <div id="extensions" class="section-anchor"><h2>Salona + Klis Extensions</h2><p>The deeper brutal-history route: Roman capital, martyr sites, amphitheater, aqueduct, and Ottoman-frontier fortress warfare.</p></div>
+    <article class="card extension" id="stop22" data-zone="Extension">
+      <div class="card-head">
+        <div class="num">22</div>
+        <div>
+          <div class="zone">Extension · 10–15 min taxi/Uber from Split</div>
+          <h2>Salona Archaeological Site / Solin</h2>
+          <p class="vibe">🏛️ Roman capital · 💀 martyrdom · ⚔️ collapse</p>
+        </div>
+      </div>
+      <p class="summary">The ancient Roman capital of Dalmatia. Historically, this is arguably more important than Split.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Salona%20Archaeological%20Park%20Solin%20Croatia" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Salona%20Archaeological%20Park%20Solin%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Go here if you want ruins, amphitheater vibes, Christian martyr stories, and the backstory for why Split became a city.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>Salona was the capital of the Roman province of Dalmatia and a major cultural, commercial, political, military, and later Christian center. The city of Solin’s history page notes that Salona developed a Christian community in the 3rd century and had numerous martyrs under Diocletian.</p>
+        <p><strong>Why important:</strong> Without Salona, Split’s origin story is incomplete. Split is the fortress-refuge after the old Roman city fades.</p>
+        <ul><li>Near modern Solin, only a short ride from Split.</li><li>Major Roman city before Split became important.</li><li>Connected to early Christianity, necropolises, basilicas, and an amphitheater.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>Salona’s Christian community suffered under Diocletian. Later regional instability and attacks contributed to its abandonment, with survivors moving toward the palace walls.</p>
+      </details>
+      
+      <div class="battle">
+        <div class="battle-title">⚔️ Total War Battle/Campaign Card: Fall of Salona</div>
+        <table><tr><th>Era</th><td>Late 6th–7th century transition</td></tr><tr><th>Attacker</th><td>Avar and Slavic pressure in the region; exact composition and events are debated</td></tr><tr><th>Defender</th><td>Romanized Dalmatian population, local militia, clergy, remaining urban elites</td></tr><tr><th>Groups</th><td>4 groups: raiding/migrating forces; local Roman-Dalmatian defenders; civilians/refugees; church communities</td></tr><tr><th>Units</th><td>Raiding infantry/cavalry, local defenders, fortified urban positions, refugees</td></tr><tr><th>Terrain</th><td>Large Roman city near coast, roads to mountains and Split, exposed urban ruins</td></tr><tr><th>Outcome</th><td>Salona was abandoned as the dominant urban center; survivors helped form medieval Split inside Diocletian’s Palace.</td></tr><tr><th>Impact</th><td>The population shift turned an imperial palace into a city and preserved Split’s Roman core through reuse.</td></tr></table>
+      </div>
+    
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>This is a half-day extension, not a quick old-town stop.</p>
+        <p class="next"><strong>Next:</strong> Klis Fortress pairs well by taxi</p>
+      </details>
+    </article>
+    
+    <article class="card extension" id="stop23" data-zone="Extension">
+      <div class="card-head">
+        <div class="num">23</div>
+        <div>
+          <div class="zone">Extension · Inside Salona</div>
+          <h2>Salona Amphitheater</h2>
+          <p class="vibe">🏟️ arena · 🩸 spectacle · Roman violence</p>
+        </div>
+      </div>
+      <p class="summary">The arena story: entertainment, punishment, status, and Roman public violence.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Salona%20Amphitheater%20Solin%20Croatia" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Salona%20Amphitheater%20Solin%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Imagine the crowd noise more than the stone. Roman spectacle was social control.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>Salona’s amphitheater reflects its scale and Roman identity. Amphitheaters were not just entertainment venues; they staged hierarchy, punishment, courage, cruelty, and imperial order.</p>
+        <p><strong>Why important:</strong> This is the brutal entertainment layer missing from the pretty palace walk.</p>
+        <ul><li>Amphitheaters were symbols of Roman urban status.</li><li>Events could include gladiatorial combat, animal hunts, and executions, depending on period and local practice.</li><li>Public violence reinforced Roman ideas of courage, punishment, and power.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>Roman arenas could turn death into public theater. Executions and spectacles taught the crowd who had power and who did not.</p>
+      </details>
+      
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>If you want ‘brutal Rome,’ this is stronger than most old-town stops.</p>
+        <p class="next"><strong>Next:</strong> Manastirine / early Christian cemetery</p>
+      </details>
+    </article>
+    
+    <article class="card extension" id="stop24" data-zone="Extension">
+      <div class="card-head">
+        <div class="num">24</div>
+        <div>
+          <div class="zone">Extension · Inside Salona</div>
+          <h2>Manastirine Early Christian Complex</h2>
+          <p class="vibe">✝️ martyrs · 🪦 cemetery · 💀 persecution</p>
+        </div>
+      </div>
+      <p class="summary">One of the most important early Christian zones at Salona, tied to cemetery and martyr memory.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Manastirine%20Salona%20Solin" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Manastirine%20Salona%20Solin&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Treat this as the human-cost stop for Diocletian’s persecution.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>The Archaeological Museum’s Salona material identifies Manastirine as a major early Christian basilica and cemetery complex outside the city walls, with earlier Roman burial layers beneath.</p>
+        <p><strong>Why important:</strong> It turns Diocletian’s persecution from abstract policy into local graves and sacred memory.</p>
+        <ul><li>Major early Christian complex outside Salona’s walls.</li><li>Built over older burial traditions.</li><li>Connects local Christianity to martyr memory and later church identity.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>This is where the empire’s violence becomes personal: bodies, graves, martyrs, families, and a community that outlasted its persecutors.</p>
+      </details>
+      
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>Quiet, less flashy, but historically heavy.</p>
+        <p class="next"><strong>Next:</strong> Return to Split or continue Klis</p>
+      </details>
+    </article>
+    
+    <article class="card extension" id="stop25" data-zone="Extension">
+      <div class="card-head">
+        <div class="num">25</div>
+        <div>
+          <div class="zone">Extension · 20–30 min taxi/Uber from Split</div>
+          <h2>Klis Fortress</h2>
+          <p class="vibe">🏰 fortress · ⚔️ Ottomans · 🐉 Game of Thrones</p>
+        </div>
+      </div>
+      <p class="summary">The best battle-history extension from Split: mountain fortress, Ottoman frontier wars, Croatian defenders, Game of Thrones Meereen.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Klis%20Fortress%20Croatia" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Klis%20Fortress%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>From the walls, look down toward Split and Salona. Whoever holds Klis threatens or protects the coast.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>Klis guarded the mountain pass between the coast and inland routes. The Split-Dalmatia tourist board highlights the Klis Uskoks and commander Petar Kružić, who defended the fortress against Ottoman pressure for decades. Klis finally fell to the Ottomans in 1537 and later changed hands again.</p>
+        <p><strong>Why important:</strong> If Split is the Roman city-shell, Klis is the military key to the hinterland. It explains the frontier-war reality behind pretty Dalmatia.</p>
+        <ul><li>About 11–12 km from Split depending on route.</li><li>Linked to Croatian kings, medieval warfare, Ottoman frontier struggle, Venice, Austria, and modern tourism.</li><li>Used as Meereen in Game of Thrones.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>Klis was a hard frontier fortress. Sieges meant hunger, betrayal, disease, executions, bombardment, and the psychological grind of watching relief fail.</p>
+      </details>
+      
+      <div class="battle">
+        <div class="battle-title">⚔️ Total War Battle Card: Siege/Fall of Klis</div>
+        <table><tr><th>Era</th><td>16th century Ottoman-Habsburg/Venetian frontier, especially 1537</td></tr><tr><th>Attacker</th><td>Ottoman forces expanding toward the Adriatic frontier</td></tr><tr><th>Defender</th><td>Klis Uskoks and Croatian/Habsburg-aligned defenders under Petar Kružić tradition</td></tr><tr><th>Groups</th><td>5 groups: Ottoman besiegers; Klis garrison/Uskoks; local civilians/refugees; Habsburg/Croatian allies; Venetian coastal observers/interests</td></tr><tr><th>Units</th><td>Fortress infantry, light raiders/Uskoks, Ottoman infantry/cavalry, artillery/siege pressure, relief forces</td></tr><tr><th>Terrain</th><td>Steep ridge fortress above pass; narrow approaches; defenders hold height, attackers control surrounding pressure</td></tr><tr><th>Outcome</th><td>Klis fell to Ottoman control in 1537 after long resistance.</td></tr><tr><th>Impact</th><td>The fall shifted the frontier and intensified the strategic importance of Split and Venetian coastal defenses.</td></tr></table>
+      </div>
+    
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>This is the highest-value side trip for your exact interests: battles + GOT + views.</p>
+        <p class="next"><strong>Next:</strong> Return to Split or pair with Salona</p>
+      </details>
+    </article>
+    
+    <article class="card extension" id="stop26" data-zone="Extension">
+      <div class="card-head">
+        <div class="num">26</div>
+        <div>
+          <div class="zone">Extension · Inside Klis</div>
+          <h2>Klis Game of Thrones / Meereen Viewpoints</h2>
+          <p class="vibe">🐉 Meereen · 🏰 walls · 📸 scene hunting</p>
+        </div>
+      </div>
+      <p class="summary">The cinematic layer: Klis doubled as parts of Meereen, but the real fortress history is more savage than the show.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Klis%20Fortress%20Game%20of%20Thrones%20Meereen" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Klis%20Fortress%20Game%20of%20Thrones%20Meereen&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Use the GOT angle as the hook, then let the real Ottoman-frontier story take over.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>Game of Thrones used Klis for Meereen scenes, making the fortress famous to visitors who might otherwise skip the deeper history. The real story — 2,000 years of strategic use and Ottoman frontier conflict — is arguably better.</p>
+        <p><strong>Why important:</strong> This is the perfect travel-companion trick: use pop culture to pull you into real history.</p>
+        <ul><li>Great views over Split, Solin, and the coast.</li><li>Pairs naturally with Salona in a taxi loop.</li><li>More dramatic than most palace GOT stops.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>The show’s slave-city fantasy is fictional; the real fortress saw siege fear, frontier raids, executions, forced displacement, and imperial competition.</p>
+      </details>
+      
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>Go late afternoon if possible. Heat is real.</p>
+        <p class="next"><strong>Next:</strong> Return to Split</p>
+      </details>
+    </article>
+    
+    <article class="card extension" id="stop27" data-zone="Extension">
+      <div class="card-head">
+        <div class="num">27</div>
+        <div>
+          <div class="zone">Extension · Taxi/optional</div>
+          <h2>Diocletian’s Aqueduct Remains</h2>
+          <p class="vibe">💧 Roman engineering · 🏗️ survival infrastructure</p>
+        </div>
+      </div>
+      <p class="summary">Water infrastructure that explains how a palace-city could function.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Diocletian%27s%20Aqueduct%20Split%20Croatia" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Diocletian%27s%20Aqueduct%20Split%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Think logistics: emperors do not just need columns; they need water, drains, storage, and labor.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>The aqueduct was built to supply Diocletian’s Palace. UNESCO’s tentative-list material notes the aqueduct was built in the AD 300s and was probably damaged in the 5th century during Gothic-war-era instability around Salona and the palace, with later restorations considered in the 19th century.</p>
+        <p><strong>Why important:</strong> This is the unsexy but crucial Rome stop: no water, no palace, no city.</p>
+        <ul><li>Roman engineering made palace life possible.</li><li>Water systems are often the first invisible thing tourists miss.</li><li>Damage and restoration show how infrastructure outlives regimes.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>Destroy water and a city starts dying without a direct assault. Infrastructure warfare is ancient.</p>
+      </details>
+      
+      <div class="battle">
+        <div class="battle-title">⚔️ Infrastructure War Card: Water Supply Under Threat</div>
+        <table><tr><th>Era</th><td>Late antique instability</td></tr><tr><th>Attacker</th><td>War, neglect, sabotage, earthquakes, political collapse</td></tr><tr><th>Defender</th><td>Roman engineers, maintenance crews, later city authorities</td></tr><tr><th>Groups</th><td>3 groups: infrastructure builders; city residents; invading/unstable forces</td></tr><tr><th>Units</th><td>Aqueduct channels, repair labor, guards, civic administrators</td></tr><tr><th>Terrain</th><td>Water route from source to palace through exposed land</td></tr><tr><th>Outcome</th><td>Damage reduced palace/city capacity; later restoration efforts show continued importance.</td></tr><tr><th>Impact</th><td>Water systems determine whether fortified places can survive.</td></tr></table>
+      </div>
+    
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>Only do this if you are really into Roman engineering or already using a taxi.</p>
+        <p class="next"><strong>Next:</strong> Better paired with Salona/Klis route</p>
+      </details>
+    </article>
+    
+    <div id="modern-layers" class="section-anchor"><h2>Modern War Layers</h2><p>WWII, Yugoslavia, Croatian independence, occupation, resistance, and modern national memory.</p></div>
+    <article class="card modern-layers" id="stop28" data-zone="Modern Layers">
+      <div class="card-head">
+        <div class="num">28</div>
+        <div>
+          <div class="zone">Modern Layers · Context overlay</div>
+          <h2>Split WWII / Partisan Memory Layer</h2>
+          <p class="vibe">⚔️ WWII · 🧨 occupation · 🕯️ memory</p>
+        </div>
+      </div>
+      <p class="summary">A context layer rather than one single stop: Split experienced occupation, resistance, bombing, and postwar political transformation.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Split%20Croatia%20World%20War%20II%20history" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Split%20Croatia%20World%20War%20II%20history&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>As you walk the Riva and civic spaces, remember the city was not only ancient and medieval; the 20th century hit it hard too.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>During World War II, Dalmatia was contested by Axis occupation forces and Yugoslav Partisans. Split’s port and political position made it strategically significant. Monuments, street names, and civic memory still carry this layer.</p>
+        <p><strong>Why important:</strong> This keeps the guide honest: Split’s brutality is not only ancient. Modern war and occupation shaped families within living memory.</p>
+        <ul><li>20th-century conflict is part of Split’s lived memory.</li><li>Ports and shipyards made the city strategically valuable.</li><li>Modern Croatia emerged after another violent breakup of political order in the 1990s.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>Occupation, reprisals, bombings, executions, ideological violence, and postwar purges are the darker underside of the sunny waterfront.</p>
+      </details>
+      
+      <div class="battle">
+        <div class="battle-title">⚔️ Total War Scene: Port City Under Occupation</div>
+        <table><tr><th>Era</th><td>World War II</td></tr><tr><th>Attacker</th><td>Axis occupation and anti-Partisan forces; later Allied pressure from sea/air context</td></tr><tr><th>Defender</th><td>Local resistance networks, Yugoslav Partisans, civilians trying to survive</td></tr><tr><th>Groups</th><td>5 groups: occupiers; collaborators; Partisans; civilians; Allied strategic actors</td></tr><tr><th>Units</th><td>Garrisons, police, resistance cells, naval/air assets, civilians</td></tr><tr><th>Terrain</th><td>Port, old city, islands, mountains, supply routes</td></tr><tr><th>Outcome</th><td>The city passed through occupation and liberation into socialist Yugoslavia.</td></tr><tr><th>Impact</th><td>Modern political identity and memory in Split cannot be separated from WWII.</td></tr></table>
+      </div>
+    
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>Do this as a mental overlay unless you specifically want WWII memorial hunting.</p>
+        <p class="next"><strong>Next:</strong> Use as context throughout</p>
+      </details>
+    </article>
+    
+    <article class="card modern-layers" id="stop29" data-zone="Modern Layers">
+      <div class="card-head">
+        <div class="num">29</div>
+        <div>
+          <div class="zone">Modern Layers · Context overlay</div>
+          <h2>Croatian Independence / 1990s Context</h2>
+          <p class="vibe">🇭🇷 independence · ⚓ naval city · 🧠 modern memory</p>
+        </div>
+      </div>
+      <p class="summary">A final context layer: the breakup of Yugoslavia and Croatian independence are part of modern Split’s story.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Split%20Croatia%20Croatian%20War%20of%20Independence%20history" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Split%20Croatia%20Croatian%20War%20of%20Independence%20history&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Notice flags, veterans’ memory, national symbolism, and the emotional intensity around Croatian identity.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>Croatia declared independence in 1991 during the breakup of Yugoslavia. Split, as a major Dalmatian city and naval center, was part of the broader wartime and political landscape.</p>
+        <p><strong>Why important:</strong> It connects Gregory of Nin, Venetian/Ottoman frontier identity, WWII, Yugoslavia, and modern Croatia into one continuum of contested sovereignty.</p>
+        <ul><li>Modern Croatian identity is recent in state terms but rooted in long historical memory.</li><li>Dalmatia’s coast had strategic military importance.</li><li>War memory remains politically and emotionally significant.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>The 1990s brought shelling, displacement, ethnic violence, fear, and a new state born through war.</p>
+      </details>
+      
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>Be respectful. This is not ancient entertainment; it is family history for many locals.</p>
+        <p class="next"><strong>Next:</strong> Use as background, not a tourist game</p>
+      </details>
+    </article>
+    
+    <article class="card foodreset" id="stop30" data-zone="Food/Reset">
+      <div class="card-head">
+        <div class="num">30</div>
+        <div>
+          <div class="zone">Food/Reset · Anytime after core route</div>
+          <h2>Old Town Konoba / Local Tavern Stop</h2>
+          <p class="vibe">🍷 local friend mode · 🍽️ recovery · 🧂 Dalmatian food</p>
+        </div>
+      </div>
+      <p class="summary">Not a monument — a travel-companion stop reminding you to stop optimizing and enjoy being in Split.</p>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=konoba%20Split%20old%20town%20Croatia" target="_blank" rel="noopener">📍 Open map</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=konoba%20Split%20old%20town%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Directions</a>
+      </div>
+      <details>
+        <summary>👀 What to look for</summary>
+        <p>Find shade, order something cold, and let the route breathe.</p>
+      </details>
+      <details open>
+        <summary>🏛️ History + why it matters</summary>
+        <p>Konoba culture connects to Dalmatian food, wine, fishing, olive oil, and family hospitality. After empire and siege history, the human point is that people kept living here.</p>
+        <p><strong>Why important:</strong> A good guide should not turn your vacation into a lecture. The point is better wandering.</p>
+        <ul><li>Good order ideas: black risotto, pašticada, grilled seafood, local wine, olive oil, bread.</li><li>Ask what is local rather than chasing TikTok spots.</li><li>Shade matters in July.</li></ul>
+      </details>
+      <details>
+        <summary>💀 Brutal history</summary>
+        <p>The brutal truth: hunger and heat ruin historical curiosity. Eat before you become a Roman casualty.</p>
+      </details>
+      
+      <details>
+        <summary>🤝 Local friend advice</summary>
+        <p>Pick the place that feels comfortable, not the place with the longest Instagram line.</p>
+        <p class="next"><strong>Next:</strong> Riva, Bačvice, or Marjan sunset</p>
+      </details>
+    </article>
+    
+
+  <section class="panel sources">
+    <div class="kicker">Sources / grounding</div>
+    <h2>Historical grounding</h2>
+    <p class="small">Battle cards simplify complex history in a strategy-game style. Ancient and medieval troop counts are often uncertain, so the guide uses “groups,” terrain, outcomes, and strategic impact rather than fake precise numbers.</p>
+    <ul><li><a href='https://whc.unesco.org/en/list/97/' target='_blank'>UNESCO – Historical Complex of Split with the Palace of Diocletian</a></li><li><a href='https://visitsplit.com/en/521/the-golden-gate' target='_blank'>Visit Split – Golden Gate</a></li><li><a href='https://visitsplit.com/en/2569/split-a-city-of-unesco' target='_blank'>Visit Split – UNESCO city page</a></li><li><a href='https://www.solin.hr/povijest/salona/' target='_blank'>City of Solin – Salona history</a></li><li><a href='https://www.dalmatia.hr/destination/klis/' target='_blank'>Split-Dalmatia Tourist Board – Klis</a></li><li><a href='https://whc.unesco.org/en/tentativelists/2015/' target='_blank'>UNESCO tentative material – Diocletian aqueduct</a></li><li><a href='https://www.armus.hr/muzej/povijest-muzeja/prirucna-zbirka-i-lokalitet-salona/lokaliteti-salona' target='_blank'>Archaeological Museum material – Salona localities/Manastirine</a></li></ul>
+  </section>
+</main>
+<footer>
+  Built as a lightweight Split travel companion. Save/open on phone; use Google Maps buttons for navigation.
+</footer>
+
+</body>
+</html>

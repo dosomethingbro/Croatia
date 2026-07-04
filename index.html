@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Split History Companion – Maps</title>
+<style>
+:root {
+ --bg:#0c0f14; --panel:#151922; --panel2:#1c2230; --text:#f5f2e8; --muted:#c6c0b5;
+ --gold:#f4c95d; --blue:#9bd8ff; --green:#b7f7b0; --line:#32394b;
+}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#0c0f14,#121720 60%,#0c0f14);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.5}
+header{position:sticky;top:0;z-index:10;background:rgba(12,15,20,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:14px}
+h1{font-size:1.35rem;margin:0 0 4px}
+p{margin:7px 0}
+.sub,.muted,.addr,.cat{color:var(--muted)}
+main{max-width:980px;margin:auto;padding:14px}
+.panel,.pin-card{background:rgba(21,25,34,.97);border:1px solid var(--line);border-radius:18px;padding:16px;margin:0 0 14px;box-shadow:0 12px 28px rgba(0,0,0,.22)}
+.kicker{color:var(--gold);font-size:.78rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+h2{margin:2px 0 8px;font-size:1.25rem}
+h3{margin:0;font-size:1.05rem}
+.buttons{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}
+.buttons a,.nav a{text-decoration:none;color:#071018;background:var(--gold);padding:10px 12px;border-radius:13px;font-weight:850;display:inline-block}
+.buttons a:nth-child(2){background:var(--blue)}
+.buttons a:nth-child(3){background:var(--green)}
+.nav{display:flex;gap:8px;overflow-x:auto;margin-top:10px;padding-bottom:2px}
+.nav a{background:#252d3d;color:var(--text);border:1px solid #3a4358;white-space:nowrap}
+.grid{display:grid;grid-template-columns:1fr;gap:10px}
+.pin-head{display:flex;gap:12px;align-items:flex-start}
+.pin-num{min-width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:#0c0f14;font-weight:950}
+.cat{font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;color:var(--blue);font-weight:850;margin:2px 0}
+.addr{font-size:.9rem}
+.note{background:#172233;border-left:4px solid var(--blue);padding:12px;border-radius:13px;margin-top:10px}
+.warn{background:#2a1717;border-left:4px solid #ff7b72;padding:12px;border-radius:13px;margin-top:10px}
+section{scroll-margin-top:95px}
+.pin-card{scroll-margin-top:95px}
+@media(min-width:760px){.grid{grid-template-columns:1fr 1fr}h1{font-size:1.8rem}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Split History Companion – Working Google Maps Pins</h1>
+  <p class="sub">All 30 stops from the latest guide, with exact Google Maps pin links and route chunks that avoid waypoint limits.</p>
+  <nav class="nav">
+    <a href="#route-buttons">Routes</a>
+    <a href="#all-pins">All Pins</a>
+    <a href="#my-maps">Google My Maps Import</a>
+    <a href="/full-history-guide">Full History Guide</a>
+  </nav>
+</header>
+<main>
+  <section class="panel" id="route-buttons">
+    <div class="kicker">Use these first</div>
+    <h2>Reliable route buttons</h2>
+    <p>Google Maps does not reliably support 30 walking waypoints in one URL. These route chunks work better on mobile and preserve naming.</p>
+    <div class="buttons">
+      <a href="https://www.google.com/maps/dir/?api=1&origin=Golden%20Gate%2C%20Split%2C%20Croatia&destination=Peristyle%2C%20Split%2C%20Croatia&travelmode=walking&waypoints=Gregory%20of%20Nin%20Statue%2C%20Split%2C%20Croatia%7CDiocletian%20Palace%20North%20Wall%2C%20Split%2C%20Croatia%7CIron%20Gate%2C%20Split%2C%20Croatia%7CNarodni%20trg%20Pjaca%2C%20Split%2C%20Croatia%7CFruit%20Square%2C%20Split%2C%20Croatia%7CRiva%2C%20Split%2C%20Croatia%7CBronze%20Gate%2C%20Split%2C%20Croatia%7CDiocletian%27s%20Cellars%2C%20Split%2C%20Croatia%7CVestibule%2C%20Diocletian%27s%20Palace%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">🗺️ Core Old Town — Part 1</a>
+      <a href="https://www.google.com/maps/dir/?api=1&origin=Peristyle%2C%20Split%2C%20Croatia&destination=Green%20Market%20Pazar%2C%20Split%2C%20Croatia&travelmode=walking&waypoints=Temple%20of%20Jupiter%2C%20Split%2C%20Croatia%7CCathedral%20of%20Saint%20Domnius%2C%20Split%2C%20Croatia%7CSilver%20Gate%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">🗺️ Core Old Town — Part 2</a>
+      <a href="https://www.google.com/maps/dir/?api=1&origin=Golden%20Gate%2C%20Split%2C%20Croatia&destination=Silver%20Gate%2C%20Split%2C%20Croatia&travelmode=walking&waypoints=Gregory%20of%20Nin%20Statue%2C%20Split%2C%20Croatia%7CDiocletian%20Palace%20North%20Wall%2C%20Split%2C%20Croatia%7CIron%20Gate%2C%20Split%2C%20Croatia%7CBronze%20Gate%2C%20Split%2C%20Croatia%7CDiocletian%27s%20Cellars%2C%20Split%2C%20Croatia%7CVestibule%2C%20Diocletian%27s%20Palace%2C%20Split%2C%20Croatia%7CPeristyle%2C%20Split%2C%20Croatia%7CTemple%20of%20Jupiter%2C%20Split%2C%20Croatia%7CCathedral%20of%20Saint%20Domnius%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">🏛️ Palace Route</a>
+      <a href="https://www.google.com/maps/dir/?api=1&origin=Iron%20Gate%2C%20Split%2C%20Croatia&destination=Riva%2C%20Split%2C%20Croatia&travelmode=walking&waypoints=Narodni%20trg%20Pjaca%2C%20Split%2C%20Croatia%7CFruit%20Square%2C%20Split%2C%20Croatia%7CRepublic%20Square%20Prokurative%2C%20Split%2C%20Croatia%7CMarmontova%20ulica%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">🦁 Medieval / Venetian Route</a>
+      <a href="https://www.google.com/maps/dir/?api=1&origin=Riva%2C%20Split%2C%20Croatia&destination=Bacvice%20Beach%2C%20Split%2C%20Croatia&travelmode=walking&waypoints=Bronze%20Gate%2C%20Split%2C%20Croatia%7CDiocletian%27s%20Cellars%2C%20Split%2C%20Croatia%7CVidilica%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">🌊 Waterfront + Chill Route</a>
+      <a href="https://www.google.com/maps/dir/?api=1&origin=Riva%2C%20Split%2C%20Croatia&destination=Klis%20Fortress%2C%20Klis%2C%20Croatia&travelmode=driving&waypoints=Salona%20Archaeological%20Park%2C%20Solin%2C%20Croatia%7CSalona%20Amphitheater%2C%20Solin%2C%20Croatia%7CManastirine%2C%20Solin%2C%20Croatia%7CDiocletian%27s%20Aqueduct%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">⚔️ Salona + Klis Driving Route</a>
+      <a href="/full-history-guide">📖 Open Full History Guide</a>
+    </div>
+    <div class="note"><strong>Pin strategy:</strong> each stop below has its own exact Google Maps search pin and directions button. That is more reliable than one overloaded map URL.</div>
+  </section>
+
+  <section class="panel" id="my-maps">
+    <div class="kicker">True all-pins map</div>
+    <h2>Import all stops into Google My Maps</h2>
+    <p>For a real Google map with all 30 pins visible at once, import the CSV below into Google My Maps. Google will geocode each address and create named pins.</p>
+    <div class="buttons">
+      <a href="split-history-stops-google-my-maps.csv" download>⬇️ Download pins CSV</a>
+      <a href="https://www.google.com/maps/d/" target="_blank" rel="noopener">🧷 Open Google My Maps</a>
+      <a href="https://www.google.com/maps/search/?api=1&query=Split%20Croatia%20history%20tour%20Diocletian%20Palace%20Salona%20Klis%20Fortress" target="_blank" rel="noopener">🔎 Google Maps search fallback</a>
+    </div>
+    <div class="warn"><strong>Why not one single all-pins link?</strong> Standard Google Maps URLs are not designed for 30 custom named pins. Google My Maps import is the reliable Google-native way to plot all of them.</div>
+  </section>
+
+  <section class="panel" id="all-pins">
+    <div class="kicker">All stops</div>
+    <h2>Working pins and naming</h2>
+    <p>Tap “Open exact pin” to confirm the location. Tap “Walk here” to start walking directions.</p>
+  </section>
+
+  <div class="grid">
+    
+    <article class="pin-card" id="stop1" data-cat="Core Palace">
+      <div class="pin-head">
+        <div class="pin-num">1</div>
+        <div>
+          <h3>Golden Gate / Porta Aurea</h3>
+          <p class="cat">Core Palace</p>
+          <p class="addr">Golden Gate, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Golden%20Gate%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Golden%20Gate%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop2" data-cat="Core Palace">
+      <div class="pin-head">
+        <div class="pin-num">2</div>
+        <div>
+          <h3>Gregory of Nin Statue</h3>
+          <p class="cat">Core Palace</p>
+          <p class="addr">Gregory of Nin Statue, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Gregory%20of%20Nin%20Statue%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Gregory%20of%20Nin%20Statue%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop3" data-cat="Core Palace">
+      <div class="pin-head">
+        <div class="pin-num">3</div>
+        <div>
+          <h3>North Wall and Defensive Towers</h3>
+          <p class="cat">Core Palace</p>
+          <p class="addr">Diocletian Palace North Wall, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Diocletian%20Palace%20North%20Wall%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Diocletian%20Palace%20North%20Wall%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop4" data-cat="Core Palace">
+      <div class="pin-head">
+        <div class="pin-num">4</div>
+        <div>
+          <h3>Cardo and Decumanus Street Grid</h3>
+          <p class="cat">Core Palace</p>
+          <p class="addr">Diocletian Palace Cardo Decumanus, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Diocletian%20Palace%20Cardo%20Decumanus%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Diocletian%20Palace%20Cardo%20Decumanus%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop5" data-cat="Core Palace">
+      <div class="pin-head">
+        <div class="pin-num">5</div>
+        <div>
+          <h3>Iron Gate / Porta Ferrea</h3>
+          <p class="cat">Core Palace</p>
+          <p class="addr">Iron Gate, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Iron%20Gate%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Iron%20Gate%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop6" data-cat="Medieval City">
+      <div class="pin-head">
+        <div class="pin-num">6</div>
+        <div>
+          <h3>People’s Square / Pjaca</h3>
+          <p class="cat">Medieval City</p>
+          <p class="addr">Narodni trg Pjaca, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Narodni%20trg%20Pjaca%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Narodni%20trg%20Pjaca%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop7" data-cat="Medieval City">
+      <div class="pin-head">
+        <div class="pin-num">7</div>
+        <div>
+          <h3>Fruit Square / Voćni Trg</h3>
+          <p class="cat">Medieval City</p>
+          <p class="addr">Fruit Square, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Fruit%20Square%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Fruit%20Square%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop8" data-cat="Medieval City">
+      <div class="pin-head">
+        <div class="pin-num">8</div>
+        <div>
+          <h3>Republic Square / Prokurative</h3>
+          <p class="cat">Medieval City</p>
+          <p class="addr">Republic Square Prokurative, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Republic%20Square%20Prokurative%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Republic%20Square%20Prokurative%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop9" data-cat="Modern Layers">
+      <div class="pin-head">
+        <div class="pin-num">9</div>
+        <div>
+          <h3>Marmont Street</h3>
+          <p class="cat">Modern Layers</p>
+          <p class="addr">Marmontova ulica, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Marmontova%20ulica%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Marmontova%20ulica%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop10" data-cat="Waterfront">
+      <div class="pin-head">
+        <div class="pin-num">10</div>
+        <div>
+          <h3>Riva Waterfront</h3>
+          <p class="cat">Waterfront</p>
+          <p class="addr">Riva, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Riva%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Riva%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop11" data-cat="Waterfront">
+      <div class="pin-head">
+        <div class="pin-num">11</div>
+        <div>
+          <h3>Bronze Gate / Southern Gate</h3>
+          <p class="cat">Waterfront</p>
+          <p class="addr">Bronze Gate, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Bronze%20Gate%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Bronze%20Gate%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop12" data-cat="Core Palace">
+      <div class="pin-head">
+        <div class="pin-num">12</div>
+        <div>
+          <h3>Diocletian’s Cellars / Palace Basements</h3>
+          <p class="cat">Core Palace</p>
+          <p class="addr">Diocletian&#x27;s Cellars, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Diocletian%27s%20Cellars%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Diocletian%27s%20Cellars%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop13" data-cat="Core Palace">
+      <div class="pin-head">
+        <div class="pin-num">13</div>
+        <div>
+          <h3>Vestibule</h3>
+          <p class="cat">Core Palace</p>
+          <p class="addr">Vestibule, Diocletian&#x27;s Palace, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Vestibule%2C%20Diocletian%27s%20Palace%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Vestibule%2C%20Diocletian%27s%20Palace%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop14" data-cat="Core Palace">
+      <div class="pin-head">
+        <div class="pin-num">14</div>
+        <div>
+          <h3>Peristyle</h3>
+          <p class="cat">Core Palace</p>
+          <p class="addr">Peristyle, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Peristyle%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Peristyle%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop15" data-cat="Core Palace">
+      <div class="pin-head">
+        <div class="pin-num">15</div>
+        <div>
+          <h3>Temple of Jupiter / Baptistery</h3>
+          <p class="cat">Core Palace</p>
+          <p class="addr">Temple of Jupiter, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Temple%20of%20Jupiter%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Temple%20of%20Jupiter%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop16" data-cat="Core Palace">
+      <div class="pin-head">
+        <div class="pin-num">16</div>
+        <div>
+          <h3>Cathedral of Saint Domnius and Bell Tower</h3>
+          <p class="cat">Core Palace</p>
+          <p class="addr">Cathedral of Saint Domnius, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Cathedral%20of%20Saint%20Domnius%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Cathedral%20of%20Saint%20Domnius%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop17" data-cat="Core Palace">
+      <div class="pin-head">
+        <div class="pin-num">17</div>
+        <div>
+          <h3>Silver Gate / Eastern Gate</h3>
+          <p class="cat">Core Palace</p>
+          <p class="addr">Silver Gate, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Silver%20Gate%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Silver%20Gate%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop18" data-cat="Local Life">
+      <div class="pin-head">
+        <div class="pin-num">18</div>
+        <div>
+          <h3>Pazar / Green Market</h3>
+          <p class="cat">Local Life</p>
+          <p class="addr">Green Market Pazar, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Green%20Market%20Pazar%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Green%20Market%20Pazar%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop19" data-cat="Hidden Alley">
+      <div class="pin-head">
+        <div class="pin-num">19</div>
+        <div>
+          <h3>Let Me Pass Street / Pusti me proć</h3>
+          <p class="cat">Hidden Alley</p>
+          <p class="addr">Pusti me proc, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Pusti%20me%20proc%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Pusti%20me%20proc%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop20" data-cat="Viewpoint">
+      <div class="pin-head">
+        <div class="pin-num">20</div>
+        <div>
+          <h3>Marjan Hill / Vidilica Viewpoint</h3>
+          <p class="cat">Viewpoint</p>
+          <p class="addr">Vidilica, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Vidilica%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Vidilica%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop21" data-cat="Cooldown">
+      <div class="pin-head">
+        <div class="pin-num">21</div>
+        <div>
+          <h3>Bačvice Beach</h3>
+          <p class="cat">Cooldown</p>
+          <p class="addr">Bacvice Beach, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Bacvice%20Beach%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Bacvice%20Beach%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop22" data-cat="Extension">
+      <div class="pin-head">
+        <div class="pin-num">22</div>
+        <div>
+          <h3>Salona Archaeological Site / Solin</h3>
+          <p class="cat">Extension</p>
+          <p class="addr">Salona Archaeological Park, Solin, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Salona%20Archaeological%20Park%2C%20Solin%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Salona%20Archaeological%20Park%2C%20Solin%2C%20Croatia&travelmode=driving" target="_blank" rel="noopener">🚗 Drive here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop23" data-cat="Extension">
+      <div class="pin-head">
+        <div class="pin-num">23</div>
+        <div>
+          <h3>Salona Amphitheater</h3>
+          <p class="cat">Extension</p>
+          <p class="addr">Salona Amphitheater, Solin, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Salona%20Amphitheater%2C%20Solin%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Salona%20Amphitheater%2C%20Solin%2C%20Croatia&travelmode=driving" target="_blank" rel="noopener">🚗 Drive here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop24" data-cat="Extension">
+      <div class="pin-head">
+        <div class="pin-num">24</div>
+        <div>
+          <h3>Manastirine Early Christian Complex</h3>
+          <p class="cat">Extension</p>
+          <p class="addr">Manastirine, Solin, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Manastirine%2C%20Solin%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Manastirine%2C%20Solin%2C%20Croatia&travelmode=driving" target="_blank" rel="noopener">🚗 Drive here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop25" data-cat="Extension">
+      <div class="pin-head">
+        <div class="pin-num">25</div>
+        <div>
+          <h3>Klis Fortress</h3>
+          <p class="cat">Extension</p>
+          <p class="addr">Klis Fortress, Klis, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Klis%20Fortress%2C%20Klis%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Klis%20Fortress%2C%20Klis%2C%20Croatia&travelmode=driving" target="_blank" rel="noopener">🚗 Drive here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop26" data-cat="Extension">
+      <div class="pin-head">
+        <div class="pin-num">26</div>
+        <div>
+          <h3>Klis Game of Thrones / Meereen Viewpoints</h3>
+          <p class="cat">Extension</p>
+          <p class="addr">Klis Fortress Game of Thrones Meereen, Klis, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Klis%20Fortress%20Game%20of%20Thrones%20Meereen%2C%20Klis%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Klis%20Fortress%20Game%20of%20Thrones%20Meereen%2C%20Klis%2C%20Croatia&travelmode=driving" target="_blank" rel="noopener">🚗 Drive here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop27" data-cat="Extension">
+      <div class="pin-head">
+        <div class="pin-num">27</div>
+        <div>
+          <h3>Diocletian’s Aqueduct Remains</h3>
+          <p class="cat">Extension</p>
+          <p class="addr">Diocletian&#x27;s Aqueduct, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Diocletian%27s%20Aqueduct%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Diocletian%27s%20Aqueduct%2C%20Split%2C%20Croatia&travelmode=driving" target="_blank" rel="noopener">🚗 Drive here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop28" data-cat="Modern Layers">
+      <div class="pin-head">
+        <div class="pin-num">28</div>
+        <div>
+          <h3>Split WWII / Partisan Memory Layer</h3>
+          <p class="cat">Modern Layers</p>
+          <p class="addr">Riva, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Riva%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Riva%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop29" data-cat="Modern Layers">
+      <div class="pin-head">
+        <div class="pin-num">29</div>
+        <div>
+          <h3>Croatian Independence / 1990s Context</h3>
+          <p class="cat">Modern Layers</p>
+          <p class="addr">Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+    <article class="pin-card" id="stop30" data-cat="Food/Reset">
+      <div class="pin-head">
+        <div class="pin-num">30</div>
+        <div>
+          <h3>Old Town Konoba / Local Tavern Stop</h3>
+          <p class="cat">Food/Reset</p>
+          <p class="addr">Konoba Split Old Town, Split, Croatia</p>
+        </div>
+      </div>
+      <div class="buttons">
+        <a href="https://www.google.com/maps/search/?api=1&query=Konoba%20Split%20Old%20Town%2C%20Split%2C%20Croatia" target="_blank" rel="noopener">📍 Open exact pin</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Konoba%20Split%20Old%20Town%2C%20Split%2C%20Croatia&travelmode=walking" target="_blank" rel="noopener">🚶 Walk here</a>
+      </div>
+    </article>
+    
+  </div>
+</main>
+</body>
+</html>
