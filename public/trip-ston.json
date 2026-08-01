@@ -1,0 +1,569 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-07-10",
+  "routeId": "dubrovnik-ston-deep-history-0800-1500",
+  "title": "Dubrovnik → Ston Deep-History Road Trip",
+  "subtitle": "First-time Croatia driving route with medieval fortifications, wartime memory, archaeology and seafood",
+  "locale": "en",
+  "timeWindow": {
+    "start": "08:00",
+    "targetReturn": "15:00",
+    "hardTurnaround": "13:40",
+    "timezone": "Europe/Zagreb"
+  },
+  "start": {
+    "name": "38 Zagrebačka ulica, Dubrovnik",
+    "coordinates": {
+      "lat": 42.64587,
+      "lng": 18.10854,
+      "accuracy": "approximate-building"
+    },
+    "navigationQuery": "38 Zagrebačka ulica, Dubrovnik, Croatia"
+  },
+  "drivingProfile": {
+    "sideOfRoad": "right",
+    "transmissionRecommendation": "automatic",
+    "recommendedVehicle": "small hatchback or compact automatic",
+    "avoid": [
+      "50cc scooter for this route",
+      "unsealed shortcuts suggested by navigation",
+      "driving into Dubrovnik Old Town restricted-access streets",
+      "alcohol at lunch for the driver"
+    ],
+    "firstTimeCroatiaNotes": [
+      "Use the D8 coastal road northwest toward Split/Slano, then follow signs for Ston and Pelješac.",
+      "Do not cross the solid center line to enter a viewpoint or parking area.",
+      "Expect buses, motorcycles and impatient local overtakes; hold a steady line and let faster traffic pass when safe.",
+      "Croatian signs use blue for ordinary directional routes and green for motorways. This itinerary stays mainly on D8 and local roads.",
+      "At roundabouts, yield to traffic already circulating. Signal right before exiting.",
+      "Parking may require payment by machine, app or SMS; check signs before walking away.",
+      "Fuel is sold in liters. Return with a buffer rather than planning to refuel at the last minute.",
+      "The Ošlje detour is optional and should be skipped if the final access road looks narrow, rough or unsigned."
+    ]
+  },
+  "routeSummary": {
+    "estimatedDrivingKm": 132,
+    "estimatedDrivingMinutes": 175,
+    "plannedStopMinutes": 205,
+    "bufferMinutes": 40,
+    "coreSequence": [
+      "Trsteno",
+      "Slano",
+      "Ošlje Rotunda (optional)",
+      "Ston",
+      "Mali Ston",
+      "Dubrovnik"
+    ]
+  },
+  "navigationLegs": [
+    {
+      "from": "38 Zagrebačka ulica",
+      "to": "Trsteno Arboretum",
+      "depart": "08:00",
+      "arriveTarget": "08:30",
+      "minutes": 30,
+      "distanceKm": 20,
+      "instructions": [
+        "Leave Zagrebačka ulica and follow signs toward Gruž/Split rather than Old Town.",
+        "Join D8 northbound toward Split.",
+        "Remain on D8 through Zaton and Orašac.",
+        "In Trsteno, slow down near the two giant plane trees beside the road.",
+        "Park only in a marked public space; the road shoulder is narrow and traffic is fast."
+      ]
+    },
+    {
+      "from": "Trsteno Arboretum",
+      "to": "Slano Rector's Palace / waterfront",
+      "depart": "09:05",
+      "arriveTarget": "09:35",
+      "minutes": 30,
+      "distanceKm": 21,
+      "instructions": [
+        "Rejoin D8 northbound toward Slano/Split.",
+        "Stay on the main coastal road; ignore shortcuts into tiny villages.",
+        "At Slano, follow local signs toward Centar or the waterfront.",
+        "Use a marked lot near the center and continue on foot."
+      ]
+    },
+    {
+      "from": "Slano",
+      "to": "Ošlje village trail access",
+      "depart": "10:00",
+      "arriveTarget": "10:20",
+      "minutes": 20,
+      "distanceKm": 14,
+      "optional": true,
+      "instructions": [
+        "Return to D8 briefly, then follow navigation toward Ošlje.",
+        "The road becomes smaller inland. Drive slowly and expect oncoming vehicles.",
+        "Stop at the village or a safe signed pull-off; do not force a rental car up an unpaved track.",
+        "Continue to the Rotunda only if the footpath is obvious and conditions are dry."
+      ]
+    },
+    {
+      "from": "Ošlje",
+      "to": "Ston public parking",
+      "depart": "10:50",
+      "arriveTarget": "11:15",
+      "minutes": 25,
+      "distanceKm": 17,
+      "instructions": [
+        "Return toward the main road and follow signs for Ston/Pelješac.",
+        "At the Ston junction, follow signs into Ston rather than continuing deep onto Pelješac.",
+        "Use the large public parking area outside the compact historic center.",
+        "Do not attempt to drive into the pedestrian old town."
+      ]
+    },
+    {
+      "from": "Ston",
+      "to": "Mali Ston",
+      "depart": "12:35",
+      "arriveTarget": "12:42",
+      "minutes": 7,
+      "distanceKm": 2,
+      "instructions": [
+        "Exit the Ston parking area and follow signs for Mali Ston.",
+        "The road is short but narrow near the village.",
+        "Park before the waterfront core and walk to lunch and Koruna Fortress."
+      ]
+    },
+    {
+      "from": "Mali Ston",
+      "to": "38 Zagrebačka ulica, Dubrovnik",
+      "depart": "13:40",
+      "arriveTarget": "14:50",
+      "minutes": 70,
+      "distanceKm": 56,
+      "instructions": [
+        "Follow signs back toward Dubrovnik.",
+        "Rejoin D8 southbound.",
+        "Stay on D8 through Slano, Trsteno, Orašac and Zaton.",
+        "Near Dubrovnik, follow navigation to Zagrebačka ulica but avoid any gate or road marked for authorized local traffic only.",
+        "Preserve at least a 10-minute buffer for fuel, parking and rental return."
+      ]
+    }
+  ],
+  "sites": [
+    {
+      "id": "trsteno-arboretum",
+      "name": "Trsteno Arboretum and Gučetić-Gozze Estate",
+      "type": [
+        "renaissance-estate",
+        "garden-history",
+        "1991-war-site"
+      ],
+      "coordinates": {
+        "lat": 42.71324,
+        "lng": 17.97692,
+        "accuracy": "high"
+      },
+      "navigationQuery": "Arboretum Trsteno, Potok 20, Trsteno, Croatia",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=42.71324,17.97692",
+      "plannedArrival": "08:30",
+      "plannedDeparture": "09:05",
+      "visitMinutes": 35,
+      "priority": "core",
+      "parking": {
+        "summary": "Use marked roadside/public parking near the village center or arboretum entrance.",
+        "warning": "Do not stop abruptly beneath the plane trees or leave the car protruding into D8."
+      },
+      "history": {
+        "overview": "Trsteno became part of the Republic of Ragusa in 1399. The Gučetić-Gozze noble family developed a country estate here from the late fifteenth century, combining a villa, irrigated garden, aqueduct, terraces and imported plants brought by Ragusan sailors. It is one of the clearest surviving examples of how Dubrovnik's elite converted maritime wealth into a cultivated rural landscape.",
+        "ancientAndMedieval": "Archaeological and local evidence indicates settlement before the Ragusan takeover. Once Dubrovnik controlled the coast, Trsteno sat on an important approach to the city and became part of the republic's agricultural and defensive hinterland.",
+        "renaissance": "The estate embodied the Ragusan ideal of otium: a controlled retreat from urban politics where nobility displayed learning, botany, engineering and status. An aqueduct was built by the end of the fifteenth century to sustain the gardens. The later Neptune fountain transformed the water system into theatrical landscape architecture.",
+        "modernWar": "In October 1991, during the wider assault on the Dubrovnik region, Yugoslav forces attacked and occupied the area. The arboretum suffered fire, damage and looting. A further major fire in 2000 destroyed a large additional area. The restored calm landscape therefore conceals both wartime destruction and later ecological loss.",
+        "darkHistory": "The important dark layer is not a medieval massacre but destruction of civilian cultural property in 1991. Trsteno demonstrates how the war reached villages and heritage sites beyond the famous shelling of Dubrovnik's Old Town."
+      },
+      "lookFor": [
+        "The giant Oriental plane trees beside D8",
+        "The axial descent from villa terraces toward the sea",
+        "The aqueduct-fed water system",
+        "Neptune fountain and grotto",
+        "Rebuilt or restored fabric that hints at 1991 damage"
+      ],
+      "sceneSetter": "Picture Ragusan captains returning from Mediterranean and Atlantic ports with seeds and cuttings for a noble family's experimental garden. Five centuries later, smoke and fire from the 1991 campaign moved through the same cultivated landscape.",
+      "safety": [
+        "Stone paths may be slick.",
+        "Heat builds quickly; keep the stop short for the overall schedule."
+      ],
+      "sources": [
+        {
+          "title": "City of Dubrovnik — Trsteno local board",
+          "url": "https://www.dubrovnik.hr/mjesna-samouprava/trsteno"
+        },
+        {
+          "title": "Historical Gardens of the Dubrovnik Area",
+          "url": "https://www.pvdp.hr/en/arboretum-trsteno/planirajte-posjet"
+        }
+      ]
+    },
+    {
+      "id": "slano-rectors-palace",
+      "name": "Slano Rector's Palace and Waterfront",
+      "type": [
+        "ragusan-administration",
+        "roman-landscape",
+        "1991-war-site"
+      ],
+      "coordinates": {
+        "lat": 42.78655,
+        "lng": 17.89184,
+        "accuracy": "medium"
+      },
+      "navigationQuery": "Knežev dvor Slano, Croatia",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=42.78655,17.89184",
+      "plannedArrival": "09:35",
+      "plannedDeparture": "10:00",
+      "visitMinutes": 25,
+      "priority": "core",
+      "parking": {
+        "summary": "Use marked parking around central Slano or the waterfront.",
+        "warning": "Avoid narrow residential lanes and hotel-only parking."
+      },
+      "history": {
+        "overview": "Slano's sheltered bay made it useful long before modern tourism. Roman-era traces, early Christian remains and medieval settlement show repeated use of the bay and surrounding fertile ground. Under the Republic of Ragusa, Slano became an administrative center for the Dubrovačko Primorje district.",
+        "ragusanPeriod": "The Rector's Palace represented Dubrovnik's authority outside the capital. A rector and local officials administered law, taxation and security in a frontier landscape positioned between the republic, neighboring lords and later Ottoman territory. Slano was therefore not simply a fishing village; it was a small node in Ragusa's tightly managed state system.",
+        "worldWarII": "The wider coast experienced Italian occupation after the Axis partition of Yugoslavia, followed by instability after Italy's 1943 collapse and German control in the final phase of the war. Local memory is fragmented among Partisan resistance, occupation, collaboration and postwar narratives; surviving memorials should be read as political artifacts as well as commemorations.",
+        "croatianWar": "In 1991 the Slano area was occupied and heavily damaged during the campaign against Dubrovnik. Homes, civic structures and religious sites were burned, shelled or looted. Much of what now appears pristine is reconstructed, which makes Slano a strong example of war damage hidden beneath a restored resort landscape.",
+        "darkHistory": "The bay's beauty can obscure its strategic vulnerability. Whoever controlled the coastal road and harbor could move people, supplies and troops along the Dubrovnik approaches."
+      },
+      "lookFor": [
+        "The relationship between the palace, church buildings and harbor",
+        "Restored stone façades that appear older than their postwar reconstruction",
+        "The enclosing geography of the bay",
+        "Any local memorial plaques near civic or church spaces"
+      ],
+      "sceneSetter": "Imagine a Ragusan rector arriving from Dubrovnik to govern a small district under strict term limits, then contrast that administrative calm with the burned waterfront of 1991.",
+      "sources": [
+        {
+          "title": "Dubrovnik Coast Tourist Board",
+          "url": "https://www.visit-slano.com/"
+        },
+        {
+          "title": "Slano settlement overview",
+          "url": "https://en.wikipedia.org/wiki/Slano"
+        }
+      ]
+    },
+    {
+      "id": "oslje-rotonda",
+      "name": "Ošlje Rotunda — Eight-Apsed Early Medieval Church",
+      "type": [
+        "early-medieval",
+        "archaeology",
+        "hidden-gem"
+      ],
+      "coordinates": {
+        "lat": 42.8176,
+        "lng": 17.7518,
+        "accuracy": "approximate-site"
+      },
+      "navigationQuery": "Rotonda u Ošljem, Ošlje, Croatia",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=42.81760,17.75180",
+      "plannedArrival": "10:20",
+      "plannedDeparture": "10:50",
+      "visitMinutes": 30,
+      "priority": "optional-weather-and-road-dependent",
+      "access": {
+        "lastMile": "Park safely in or near Ošlje and continue on foot only where the trail is evident.",
+        "doNot": "Do not take a low rental car onto an unsigned dirt or rocky track.",
+        "skipRule": "Skip immediately if access is unclear, wet, overgrown or would endanger the 15:00 return."
+      },
+      "history": {
+        "overview": "Above Ošlje stand the conserved remains of an exceptionally unusual church with eight apses radiating around a compact central space. The form is rare enough that its date, patronage and purpose remain debated. Ošlje itself appears in written records by the tenth century.",
+        "interpretiveDebate": "The building is often assigned broadly to the early medieval period, but precise dating is difficult. Its centralized plan may reflect prestigious architectural models transmitted through Byzantine, Adriatic or Carolingian cultural networks. The safest interpretation is that it demonstrates that this now-quiet frontier was connected to sophisticated religious and political currents.",
+        "frontierContext": "The site lies inland from Mali Ston Bay, in terrain that historically mediated between the coast and the Balkan hinterland. Control of paths, hill slopes and communities mattered because Dubrovnik's security depended on understanding and managing the frontier beyond its walls.",
+        "darkHistory": "There is no securely documented massacre attached to the Rotunda. Its darker atmosphere comes from abandonment, depopulation and the fragility of archaeological memory. Avoid turning uncertain history into a sensational claim.",
+        "whyItMatters": "This is the route's most genuinely obscure archaeological stop: not grand, but capable of changing how you see the supposedly empty hills between Dubrovnik and Ston."
+      },
+      "lookFor": [
+        "The radial arrangement of the apses",
+        "Wall thickness and surviving masonry",
+        "Views toward the Mali Ston Bay corridor",
+        "The contrast between a once-important settlement and today's sparse population"
+      ],
+      "sceneSetter": "Stand inside the footprint and imagine a small congregation surrounded by curved apses, in a building whose unusual geometry signaled meaning now partly lost.",
+      "sources": [
+        {
+          "title": "Dubrovnik Coast Tourist Board — Rotonda in Ošlje",
+          "url": "https://www.visit-slano.com/?u=rotonda-in-oslje%2Fen%2Fst%2F189%2F37"
+        },
+        {
+          "title": "Croatian Register of Cultural Goods",
+          "url": "https://registar.kulturnadobra.hr/"
+        }
+      ]
+    },
+    {
+      "id": "ston-old-town-walls",
+      "name": "Ston Old Town, Veliki Kaštio and Walls",
+      "type": [
+        "medieval-fortification",
+        "planned-town",
+        "military-engineering"
+      ],
+      "coordinates": {
+        "lat": 42.83815,
+        "lng": 17.6964,
+        "accuracy": "high"
+      },
+      "navigationQuery": "Ston public parking, Ston, Croatia",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=42.83815,17.69640",
+      "plannedArrival": "11:15",
+      "plannedDeparture": "12:15",
+      "visitMinutes": 60,
+      "priority": "must-do",
+      "parking": {
+        "summary": "Use the main paid public lot outside the old town and walk.",
+        "warning": "Do not follow navigation into pedestrian lanes."
+      },
+      "history": {
+        "overview": "After securing Pelješac in the fourteenth century, the Republic of Ragusa created Ston and Mali Ston as a coordinated fortified system. The walls originally extended roughly seven kilometers; about 5.5 kilometers survive. This was not decorative architecture. It was a strategic barrier across the peninsula's neck.",
+        "strategicPurpose": "The system protected access to Pelješac, defended the salt pans and created mutually supporting strongpoints at Ston and Mali Ston. The hill wall denied easy movement across the isthmus, while forts and towers allowed surveillance and layered defense.",
+        "plannedUrbanism": "Ston was laid out with an unusually regular street grid. This reflects a government capable of planning housing, administration, churches, storage, defense and labor around a state economic asset.",
+        "militaryEvolution": "The defenses changed over centuries as weapons improved. Towers, bastions, curtain walls and major forts such as Veliki Kaštio and Koruna served different fields of fire. The famous architects associated with later work demonstrate how seriously Ragusa invested in this frontier.",
+        "earthquakesAndDismantling": "Earthquakes, especially the catastrophe of 1667 and later shocks, damaged the complex. After the fall of the republic, sections were dismantled or reused under Austrian rule. The walls therefore survive as both military system and archaeological remainder.",
+        "darkHistory": "The walls protected wealth and people, but they also enforced a controlled labor and monopoly landscape. Salt production, customs, movement and settlement were governed by the state. Fortification is evidence of prosperity, fear and coercive capacity at the same time."
+      },
+      "recommendedWalk": {
+        "plan": "For this compressed itinerary, explore Ston-side walls and Veliki Kaštio rather than walking the full crossing to Mali Ston.",
+        "durationMinutes": 45,
+        "heatNote": "The climb is exposed and steep. Carry water and turn back early if either of you is overheated."
+      },
+      "lookFor": [
+        "Regular street grid",
+        "Veliki Kaštio's relationship to the salt pans",
+        "Tower spacing and overlapping lines of sight",
+        "The wall climbing directly over steep terrain",
+        "Field Gate and inscriptions where accessible"
+      ],
+      "sceneSetter": "Picture a hostile force arriving at the narrow entrance to Pelješac. Ahead is a gridded town, guarded gates, a fortress beside the saltworks and a stone barrier rising over the mountain to another fortified port.",
+      "sources": [
+        {
+          "title": "Walls of Ston — official visitor information",
+          "url": "https://www.ston.hr/?u=ston-walls%2Fen%2Fst%2F58"
+        },
+        {
+          "title": "Society of Friends of Dubrovnik Antiquities",
+          "url": "https://citywallsdubrovnik.hr/walls-of-ston/"
+        }
+      ]
+    },
+    {
+      "id": "ston-saltworks",
+      "name": "Ston Saltworks",
+      "type": [
+        "industrial-archaeology",
+        "economic-history",
+        "ragusan-state"
+      ],
+      "coordinates": {
+        "lat": 42.8367,
+        "lng": 17.6953,
+        "accuracy": "high"
+      },
+      "navigationQuery": "Solana Ston, Croatia",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=42.83670,17.69530",
+      "plannedArrival": "12:15",
+      "plannedDeparture": "12:35",
+      "visitMinutes": 20,
+      "priority": "core",
+      "history": {
+        "overview": "The salt pans are the economic key to understanding Ston. Salt preserved food, provisioned ships and armies, supported livestock and generated taxation. Ragusa treated the works as a strategic state asset and built the fortification system partly to secure them.",
+        "ancientLayer": "Salt was exploited in the Ston landscape before the mature Ragusan system. The field also preserves traces of Roman land division and a dense sacred landscape that may reuse earlier boundaries and cult locations.",
+        "ragusanMonopoly": "The republic regulated production, storage and sale. This turned evaporation ponds into a fiscal machine. The walls, customs controls and planned town formed one integrated system around the commodity.",
+        "laborAndPower": "Traditional production depended on hard seasonal labor under intense sun. The picturesque white salt crystals should be understood as the product of organized work, surveillance and state monopoly.",
+        "continuity": "The saltworks remains active using traditional solar evaporation methods, creating a rare continuity between premodern infrastructure and current production."
+      },
+      "lookFor": [
+        "Geometry of evaporation basins",
+        "Channels controlling seawater",
+        "Proximity to Veliki Kaštio and city walls",
+        "Storage and processing buildings",
+        "How flat industrial terrain is enclosed by steep fortifications"
+      ],
+      "sceneSetter": "The walls make sense only when you see the pans: a small republic spent heavily on stone because these shallow pools reliably converted sunlight and seawater into revenue.",
+      "sources": [
+        {
+          "title": "Ston Tourist Board — Saltworks",
+          "url": "https://www.ston.hr/?u=saltworks%2Fen%2Fst%2F59"
+        },
+        {
+          "title": "Ston walking and heritage guide",
+          "url": "https://www.ston.hr/?u=pjesacenje%2Feng%2Fst%2F85"
+        }
+      ]
+    },
+    {
+      "id": "ston-wwii-memory",
+      "name": "Ston WWII and Yugoslav Memory Layer",
+      "type": [
+        "world-war-ii",
+        "memory-history",
+        "interpretive-stop"
+      ],
+      "coordinates": {
+        "lat": 42.8379,
+        "lng": 17.6961,
+        "accuracy": "area-not-monument-pin"
+      },
+      "navigationQuery": "Ston Croatia WWII memorial",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=42.83790,17.69610",
+      "plannedArrival": "within Ston walk",
+      "visitMinutes": 10,
+      "priority": "interpretive",
+      "history": {
+        "axisOccupation": "After the Axis invasion and breakup of Yugoslavia in 1941, southern Dalmatia fell within an unstable occupation system dominated first by Fascist Italy. Repression, economic control and competing armed movements reshaped daily life.",
+        "postItaly1943": "Italy's collapse in September 1943 opened a violent power vacuum. German forces moved to control the Adriatic coast while Partisans expanded operations. Local people faced conscription, reprisals, shortages and shifting authority.",
+        "liberationAndAftermath": "Partisan victory ended Axis rule and created socialist Yugoslavia. Memorials emphasized antifascist liberation and fallen fighters. That story is real, but incomplete without acknowledging postwar executions, political repression and later disputes over memory.",
+        "howToReadMemorials": "A Yugoslav-era monument is evidence of both the people commemorated and the state that selected the language, symbols and categories of remembrance. Note whether names, stars, inscriptions or plaques have been altered or removed.",
+        "accuracyNote": "The exact small memorial pin should be verified locally. This dataset intentionally anchors the interpretation to central Ston rather than pretending centimeter-level certainty."
+      },
+      "sceneSetter": "Read the monument twice: first as grief for people killed in an antifascist war, and again as an artifact of the socialist state that decided how that war would be publicly remembered.",
+      "sources": [
+        {
+          "title": "Red History Museum Dubrovnik",
+          "url": "https://redhistorymuseum.com/"
+        },
+        {
+          "title": "Ston municipal heritage context",
+          "url": "https://www.ston.hr/"
+        }
+      ]
+    },
+    {
+      "id": "mali-ston-koruna",
+      "name": "Mali Ston and Koruna Fortress",
+      "type": [
+        "fortified-port",
+        "medieval-military",
+        "oyster-culture"
+      ],
+      "coordinates": {
+        "lat": 42.8468,
+        "lng": 17.70345,
+        "accuracy": "high"
+      },
+      "navigationQuery": "Koruna Fortress, Mali Ston, Croatia",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=42.84680,17.70345",
+      "plannedArrival": "12:42",
+      "plannedDeparture": "13:40",
+      "visitMinutes": 58,
+      "priority": "must-do",
+      "history": {
+        "overview": "Mali Ston formed the northern anchor of the Ston defensive system. Koruna Fortress guarded the bay, port and road approaches while the Great Wall climbed toward Ston over the ridge.",
+        "militaryLogic": "The paired towns allowed Ragusa to watch both sides of the isthmus. Koruna's towers and walls controlled the harbor end; Ston protected the saltworks and southern approach. Signals and movement along the wall linked the positions.",
+        "oysterLandscape": "Mali Ston Bay's mix of fresh and salt water creates conditions favorable to oysters and mussels. Shellfish cultivation has a long regional history and became part of the protected economic landscape alongside salt and maritime trade.",
+        "darkHistory": "The fortified harbor reveals that food production and commerce were never separate from military power. Protecting shellfish beds, shipping and the peninsula meant controlling coastline, labor and access.",
+        "modernLayer": "Earthquakes, political change and restoration altered the fortress complex, but the basic relationship between harbor, fort and ridge wall remains legible."
+      },
+      "lookFor": [
+        "Koruna's towers facing the waterfront",
+        "The Great Wall rising toward the ridge",
+        "Narrow approaches that could be controlled from the fort",
+        "Oyster-farming landscape across the bay"
+      ],
+      "sceneSetter": "From the harbor, follow the wall with your eyes up the mountain. It physically stitches a naval lookout and fortified port to Ston's salt economy on the other side.",
+      "sources": [
+        {
+          "title": "Ston Tourist Board regional guide",
+          "url": "https://www.ston.hr/?u=visit-ston-region-we-live-it-you-will-love-it%2Fen%2Fst%2F175%2F215"
+        },
+        {
+          "title": "Walls of Ston entrance information",
+          "url": "https://www.ston.hr/?u=ston-walls%2Fen%2Fst%2F58"
+        }
+      ]
+    },
+    {
+      "id": "mali-ston-lunch",
+      "name": "Mali Ston Seafood Lunch",
+      "type": [
+        "food",
+        "oysters",
+        "time-boxed-stop"
+      ],
+      "coordinates": {
+        "lat": 42.84645,
+        "lng": 17.70365,
+        "accuracy": "waterfront-area"
+      },
+      "navigationQuery": "Mali Ston restaurants, Croatia",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=42.84645,17.70365",
+      "plannedArrival": "12:50",
+      "plannedDeparture": "13:30",
+      "visitMinutes": 40,
+      "priority": "must-do",
+      "orderingGuide": {
+        "bestTimeEfficientOrder": [
+          "Mali Ston oysters",
+          "mussels buzara",
+          "grilled fish or black risotto if kitchen timing allows",
+          "bread for the buzara broth"
+        ],
+        "driver": "Skip wine or keep it alcohol-free.",
+        "timeControl": "Tell staff immediately that you must leave by 13:30."
+      },
+      "history": {
+        "overview": "Eating oysters here is part of the historical landscape rather than a detached restaurant stop. The bay's ecology, Ragusan regulation, coastal settlement and modern aquaculture all converge in the meal.",
+        "foodSafety": "Choose an established restaurant or producer with refrigerated, traceable shellfish. Raw shellfish always carries some illness risk; cooked mussels are the lower-risk choice."
+      },
+      "sources": [
+        {
+          "title": "Ston Tourist Board — food and shellfish context",
+          "url": "https://www.ston.hr/?u=visit-ston-region-we-live-it-you-will-love-it%2Fen%2Fst%2F175%2F215"
+        }
+      ]
+    }
+  ],
+  "optionalAddOnsNotForThisWindow": [
+    {
+      "name": "Kupari abandoned military resort",
+      "reasonExcluded": "South of Dubrovnik, opposite direction from Ston; would create costly backtracking.",
+      "bestUse": "Separate 2–3 hour trip."
+    },
+    {
+      "name": "Tabor WWII memorial near Pijavičino",
+      "reasonExcluded": "Too far along Pelješac for a guaranteed 15:00 return.",
+      "bestUse": "Full-day Pelješac history and wine route."
+    },
+    {
+      "name": "Gudnja Cave",
+      "reasonExcluded": "Access and visit logistics are too uncertain for a first-time, tightly timed rental-car day.",
+      "bestUse": "Pre-arranged archaeological excursion."
+    },
+    {
+      "name": "Napoleon Road",
+      "reasonExcluded": "Some alignments are rough or unsuitable for a low rental car; route quality must be locally verified.",
+      "bestUse": "Add only with a confirmed paved segment and more time."
+    }
+  ],
+  "contingencyPlans": {
+    "running15MinutesLate": "Skip the Ošlje Rotunda and continue directly from Slano to Ston.",
+    "running30MinutesLate": "Skip Ošlje and reduce Ston wall time to 35 minutes.",
+    "extremeHeat": "Do not climb the exposed upper wall. Visit Veliki Kaštio, old town, salt pans and Mali Ston instead.",
+    "rainOrWetStone": "Avoid steep wall sections and the Ošlje footpath.",
+    "parkingDelay": "Prioritize Ston and Mali Ston; Trsteno and Slano can become 10-minute exterior stops.",
+    "mustLeaveMaliSton": "13:40 absolute latest for a comfortable return target."
+  },
+  "appIntegration": {
+    "suggestedMapCategories": {
+      "mustDo": "⭐",
+      "hiddenGem": "💎",
+      "darkHistory": "⚔️",
+      "ancient": "🏛️",
+      "food": "🍽️",
+      "parking": "🅿️",
+      "warning": "⚠️"
+    },
+    "recommendedUI": [
+      "Show a persistent next-departure countdown.",
+      "Add a one-tap 'skip optional stop' action that recalculates the schedule.",
+      "Display navigationQuery as a fallback when coordinates are approximate.",
+      "Render coordinate accuracy visibly for obscure sites.",
+      "Add a driver mode with only the next three instructions and no long history text.",
+      "Unlock history narration after parking, not while driving."
+    ]
+  },
+  "disclaimer": "Coordinates for major sites are suitable for map pins. Obscure or memorial locations marked approximate should be verified against local signage and the user's navigation app. Opening hours, tickets, roadworks and parking rules can change."
+}
