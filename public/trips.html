@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#0B0F14">
+<title>Command Center — Choose your trip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Space+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0B0F14; --panel:#121A22; --line:#243441; --text:#E7EEF3; --dim:#7C93A6;
+  --gold:#C9A24B; --teal:#3DD6C4;
+  --serif:'Fraunces',Georgia,serif; --sans:'Space Grotesk',system-ui,sans-serif; --mono:'IBM Plex Mono',monospace;
+}
+html,body{background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;min-height:100dvh}
+body{background-image:radial-gradient(ellipse 80% 50% at 50% -10%,#16212C 0%,var(--bg) 70%)}
+.wrap{max-width:960px;margin:0 auto;padding:calc(env(safe-area-inset-top,0) + 40px) 20px 48px;display:flex;flex-direction:column;min-height:100dvh}
+.masthead{text-align:center;margin-bottom:34px}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:var(--dim)}
+.masthead h1{font-family:var(--serif);font-weight:400;font-size:clamp(30px,7vw,46px);line-height:1.05;margin:12px 0 10px;letter-spacing:-.01em}
+.masthead p{color:var(--dim);font-size:14px;line-height:1.6;max-width:440px;margin:0 auto}
+.grid{display:grid;grid-template-columns:1fr;gap:18px}
+@media(min-width:760px){.grid{grid-template-columns:1fr 1fr}}
+.card{position:relative;display:block;text-decoration:none;color:inherit;border:1px solid var(--line);border-radius:18px;
+  overflow:hidden;background:var(--panel);transition:transform .3s cubic-bezier(.2,.7,.2,1),border-color .3s;min-height:340px;
+  display:flex;flex-direction:column;justify-content:flex-end}
+.card:hover{transform:translateY(-4px)}
+.card .ph{position:absolute;inset:0;z-index:0}
+.card .ph img{width:100%;height:100%;object-fit:cover;opacity:.7}
+.card .scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(11,15,20,.15) 0%,rgba(11,15,20,.55) 55%,rgba(11,15,20,.95) 100%)}
+.card .body{position:relative;z-index:2;padding:22px}
+.card .kicker{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:9px}
+.card .kicker .dot{width:7px;height:7px;border-radius:50%}
+.card h2{font-family:var(--serif);font-weight:400;font-size:26px;line-height:1.1;margin-bottom:6px}
+.card .place{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--dim);margin-bottom:12px}
+.card .desc{font-size:13px;line-height:1.55;color:#C4D2DC;margin-bottom:16px}
+.card .feats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
+.card .feat{font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--dim);
+  border:1px solid var(--line);border-radius:6px;padding:3px 8px;background:rgba(11,15,20,.4)}
+.card .enter{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:500}
+.card .enter svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s}
+.card:hover .enter svg{transform:translateX(4px)}
+
+.card.dubrovnik{border-color:rgba(201,162,75,.28)}
+.card.dubrovnik:hover{border-color:var(--gold)}
+.card.dubrovnik .kicker{color:var(--gold)} .card.dubrovnik .kicker .dot{background:var(--gold)}
+.card.dubrovnik .enter{color:var(--gold)}
+
+.card.honolulu{border-color:rgba(61,214,196,.28)}
+.card.honolulu:hover{border-color:var(--teal)}
+.card.honolulu .kicker{color:var(--teal)} .card.honolulu .kicker .dot{background:var(--teal)}
+.card.honolulu .enter{color:var(--teal)}
+
+.foot{margin-top:auto;padding-top:34px;text-align:center;color:var(--dim);font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div class="eyebrow">Tobi &amp; Luke &middot; Command Center</div>
+    <h1>Choose your trip</h1>
+    <p>Two travellers, two very different places &mdash; each with its own companion tuned to how you explore it.</p>
+  </header>
+
+  <div class="grid">
+    <a class="card dubrovnik" href="/dubrovnik.html">
+      <div class="ph"><img src="/trips/dubrovnik-hero.png" alt="Aerial view of Dubrovnik's terracotta rooftops and city walls at golden hour"></div>
+      <div class="scrim"></div>
+      <div class="body">
+        <div class="kicker"><span class="dot"></span>History Companion</div>
+        <h2>Dubrovnik</h2>
+        <div class="place">HR &middot; Dalmatian Coast &middot; 42.64&deg;N 18.11&deg;E</div>
+        <p class="desc">Stand anywhere and travel back through the eras of that exact ground. Time Machine, live map, road trips to Ston.</p>
+        <div class="feats"><span class="feat">Time Machine</span><span class="feat">Road Trip</span><span class="feat">Siege Map</span></div>
+        <span class="enter">Enter <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+
+    <a class="card honolulu" href="/honolulu.html">
+      <div class="ph"><img src="/trips/honolulu-hero.png" alt="Waikiki beach and Diamond Head at blue-hour dusk"></div>
+      <div class="scrim"></div>
+      <div class="body">
+        <div class="kicker"><span class="dot"></span>Mission Control</div>
+        <h2>Honolulu</h2>
+        <div class="place">HI &middot; Waikīkī &middot; 21.28&deg;N 157.83&deg;W</div>
+        <p class="desc">A live decision console for a short, no-car trip. Tap NEXT MOVE and get explainable picks tuned to time, weather and what you&rsquo;ve already done.</p>
+        <div class="feats"><span class="feat">Next Move</span><span class="feat">Live Weather</span><span class="feat">Sim Panel</span></div>
+        <span class="enter">Enter <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+  </div>
+
+  <div class="foot">Pick a place to begin</div>
+</div>
+</body>
+</html>

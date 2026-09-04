@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#0B1420">
+<title>Waikīkī Mission Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0B1420; --panel:#121F2E; --panel2:#0E1926; --line:#24384A;
+  --text:#E7EEF3; --dim:#7C93A6;
+  --ok:#3DD6C4; --caution:#E8A23D; --alert:#E2543D; --wild:#B98CE0;
+  --sans:'Space Grotesk',system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+html,body{background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+body{min-height:100dvh}
+.mono{font-family:var(--mono)}
+button{font-family:inherit;cursor:pointer}
+a{color:inherit}
+
+/* shell */
+.app{max-width:1180px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column}
+@media(min-width:900px){ .app{display:grid;grid-template-columns:minmax(0,1fr) 420px;grid-template-rows:auto 1fr;gap:0} }
+
+/* top status bar */
+.statusbar{position:sticky;top:0;z-index:40;grid-column:1/-1;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  padding:calc(env(safe-area-inset-top,0) + 12px) 16px 12px;background:rgba(11,20,32,.92);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line)}
+.sb-back{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--dim);text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:6px 9px}
+.sb-back svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sb-title{font-weight:600;font-size:14px;letter-spacing:.01em;margin-right:auto}
+.sb-title small{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);font-weight:400}
+.readout{display:flex;flex-direction:column;align-items:flex-end;font-family:var(--mono);line-height:1.15}
+.readout .lab{font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.readout .val{font-size:14px;font-weight:500}
+.readout.w-clear .val{color:var(--ok)} .readout.w-cloudy .val{color:var(--dim)}
+.readout.w-rain-soon .val{color:var(--caution)} .readout.w-raining .val{color:var(--alert)}
+.readout .sub{font-size:8px;color:var(--dim)}
+
+/* left column = map */
+.mapwrap{position:relative;min-height:280px;grid-column:1;grid-row:2}
+@media(max-width:899px){ .mapwrap{height:38vh} }
+#hmap{position:absolute;inset:0;background:var(--panel2)}
+.map-legend{position:absolute;left:12px;bottom:12px;z-index:500;display:flex;gap:10px;flex-wrap:wrap;
+  background:rgba(11,20,32,.85);border:1px solid var(--line);border-radius:9px;padding:7px 10px;backdrop-filter:blur(6px)}
+.map-legend span{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--dim)}
+.map-legend i{width:8px;height:8px;border-radius:50%}
+
+/* right column = console */
+.console{grid-column:2;grid-row:2;display:flex;flex-direction:column;gap:14px;padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+@media(min-width:900px){ .console{border-left:1px solid var(--line);max-height:calc(100dvh - 58px)} }
+
+/* rain banner */
+.rain-banner{display:none;align-items:center;gap:10px;background:rgba(232,162,61,.13);border:1px solid var(--caution);
+  border-radius:11px;padding:11px 13px;color:var(--text);font-size:13px;cursor:pointer}
+.rain-banner.show{display:flex}
+.rain-banner svg{flex:0 0 18px;width:18px;height:18px;fill:none;stroke:var(--caution);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.rain-banner b{color:var(--caution)}
+.rain-banner .go{margin-left:auto;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--caution);white-space:nowrap}
+
+/* panel base — thin border + 3px status left-border */
+.panel{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--line);border-radius:12px;padding:15px}
+.panel.ok{border-left-color:var(--ok)} .panel.caution{border-left-color:var(--caution)}
+.panel.alert{border-left-color:var(--alert)} .panel.wild{border-left-color:var(--wild)}
+.panel-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.panel-h .t{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+
+/* NEXT MOVE trigger */
+.nextmove{width:100%;border:none;border-radius:12px;background:linear-gradient(135deg,#155e57,#0f8a7e);
+  color:#04120f;padding:20px;display:flex;flex-direction:column;align-items:center;gap:4px;transition:transform .12s,filter .2s}
+.nextmove:hover{filter:brightness(1.08)} .nextmove:active{transform:scale(.985)}
+.nextmove .big{font-size:22px;font-weight:700;letter-spacing:.02em;color:#031310}
+.nextmove .sm{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#0a3b35}
+.nextmove[disabled]{opacity:.6;filter:grayscale(.3)}
+
+.refine{display:flex;gap:8px;margin-top:10px}
+.refine input{flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--text);
+  font-family:var(--mono);font-size:12px;padding:9px 11px}
+.refine input::placeholder{color:var(--dim)}
+.refine button{background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--dim);padding:0 12px;font-family:var(--mono);font-size:11px}
+
+.ainote{font-family:var(--mono);font-size:9.5px;color:var(--dim);margin-top:8px;line-height:1.5}
+.ainote.hint{color:var(--caution)}
+
+/* candidate cards */
+.candidates{display:flex;flex-direction:column;gap:10px}
+.cand{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--line);border-radius:11px;padding:13px;
+  opacity:0;transform:translateY(8px);animation:rise .32s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes rise{to{opacity:1;transform:none}}
+.cand.ok{border-left-color:var(--ok)} .cand.caution{border-left-color:var(--caution)} .cand.wild{border-left-color:var(--wild)}
+.cand-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:7px}
+.cand-name{font-size:16px;font-weight:600;line-height:1.15;flex:1;min-width:0}
+.cand-tag{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);
+  border:1px solid var(--line);border-radius:5px;padding:3px 6px;white-space:nowrap}
+.cand.wild .cand-tag{border-color:var(--wild);color:var(--wild)}
+.cand-wildtag{display:inline-block;font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--wild);margin-bottom:6px}
+.cand-rat{font-size:13px;line-height:1.5;color:#C4D4DF;margin-bottom:10px}
+.cand-score{display:flex;align-items:baseline;gap:9px;margin-bottom:9px;flex-wrap:wrap}
+.cand-score .num{font-family:var(--mono);font-size:17px;font-weight:600;color:var(--ok)}
+.cand.wild .cand-score .num{color:var(--wild)}
+.cand-score .num.neg{color:var(--alert)}
+.cand-break{font-family:var(--mono);font-size:10px;color:var(--dim);line-height:1.5}
+.cand-break b{color:#9db3c4;font-weight:500}
+.cand-stats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}
+.cand-stat{font-family:var(--mono);font-size:9.5px;letter-spacing:.03em;color:var(--dim);background:var(--panel2);border-radius:6px;padding:4px 7px}
+.cand-slack{font-family:var(--mono);font-size:11px;font-weight:500;margin-bottom:10px}
+.cand-slack.good{color:var(--ok)} .cand-slack.tight{color:var(--caution)} .cand-slack.bad{color:var(--alert)}
+.cand-actions{display:flex;gap:8px}
+.cand-btn{flex:1;border-radius:8px;padding:9px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);background:var(--panel2);color:var(--dim)}
+.cand-btn.log{background:var(--ok);border-color:transparent;color:#04120f;font-weight:600}
+.cand-empty{font-family:var(--mono);font-size:12px;color:var(--dim);line-height:1.6;text-align:center;padding:14px 4px}
+
+/* log manifest */
+.logrows{display:flex;flex-direction:column}
+.logrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:13px}
+.logrow:first-child{border-top:none}
+.logrow .lr-tag{font-family:var(--mono);font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);border:1px solid var(--line);border-radius:4px;padding:2px 5px}
+.logrow .lr-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.logrow .lr-time{font-family:var(--mono);font-size:10px;color:var(--dim)}
+.logrow .lr-del{background:none;border:none;color:var(--dim);font-size:16px;line-height:1;padding:0 2px}
+.logrow .lr-who{font-family:var(--mono);font-size:9px;color:var(--dim)}
+.log-empty{font-family:var(--mono);font-size:11.5px;color:var(--dim);text-align:center;padding:10px 0}
+
+/* sim panel */
+.sim-beats,.sim-weather{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.sim-weather{grid-template-columns:repeat(4,1fr);margin-top:9px}
+.sim-btn{border:1px solid var(--line);background:var(--panel2);color:var(--dim);border-radius:8px;padding:9px 4px;
+  font-family:var(--mono);font-size:10px;letter-spacing:.02em;text-align:center}
+.sim-btn.active{border-color:var(--ok);color:var(--ok)}
+.sim-btn.wbtn.active.w-rain-soon{border-color:var(--caution);color:var(--caution)}
+.sim-btn.wbtn.active.w-raining{border-color:var(--alert);color:var(--alert)}
+.sim-lab{font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:12px 0 2px}
+.sim-live{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:11px}
+.sim-live button{background:var(--panel2);border:1px solid var(--line);border-radius:7px;color:var(--ok);padding:6px 10px;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);z-index:200;background:#0a1622;
+  border:1px solid var(--line);border-radius:10px;padding:11px 16px;font-family:var(--mono);font-size:12px;color:var(--text);
+  opacity:0;pointer-events:none;transition:.28s;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.toast.show{opacity:1;transform:translateX(-50%)}
+
+/* leaflet marker */
+.hm-pin{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:600;font-size:10px;
+  width:24px;height:24px;border-radius:50%;background:#0B1420}
+.userdot{width:14px;height:14px;border-radius:50%;background:var(--ok);border:2px solid #0B1420;box-shadow:0 0 0 3px rgba(61,214,196,.35)}
+.leaflet-container{background:var(--panel2)}
+/* keyless OSM tiles recoloured to fit the dark instrument aesthetic */
+.leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.92) contrast(.9) saturate(.6)}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- STATUS BAR -->
+  <div class="statusbar">
+    <a class="sb-back" href="/trips.html"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Trips</a>
+    <div class="sb-title">Waikīkī Mission Control<small>Tobi &amp; Luke · no-car ops</small></div>
+    <div class="readout"><span class="lab">Mission clock</span><span class="val" id="roClock">--:--</span><span class="sub" id="roDay">—</span></div>
+    <div class="readout w-clear" id="roWeatherBox"><span class="lab">Weather</span><span class="val" id="roWeather">—</span><span class="sub" id="roTemp"></span></div>
+    <div class="readout"><span class="lab">Sunset</span><span class="val" id="roSunset">--:--</span><span class="sub" id="roSunsetIn"></span></div>
+  </div>
+
+  <!-- MAP -->
+  <div class="mapwrap">
+    <div id="hmap"></div>
+    <div class="map-legend">
+      <span><i style="background:var(--ok)"></i>Candidate</span>
+      <span><i style="background:var(--wild)"></i>Wildcard</span>
+      <span><i style="background:var(--dim)"></i>Other</span>
+      <span><i style="background:var(--caution)"></i>Logged</span>
+    </div>
+  </div>
+
+  <!-- CONSOLE -->
+  <div class="console">
+    <div class="rain-banner" id="rainBanner">
+      <svg viewBox="0 0 24 24"><path d="M16 13v6M8 13v6M12 15v6M20 16.6A5 5 0 0018 7h-1.26A8 8 0 104 15.25"/></svg>
+      <span><b>Rain rolling in.</b> Reroute to indoor?</span>
+      <span class="go" id="rainGo">Reroute →</span>
+    </div>
+
+    <div class="panel ok">
+      <button class="nextmove" id="nextMoveBtn"><span class="big">NEXT MOVE</span><span class="sm">Tap for picks tuned to right now</span></button>
+      <div class="refine">
+        <input id="refineInput" placeholder="optional: 'something weird', 'no museums'…" autocomplete="off">
+        <button id="refineBtn">↵</button>
+      </div>
+      <div class="ainote" id="aiNote"></div>
+    </div>
+
+    <div class="panel" id="candPanel" style="display:none">
+      <div class="panel-h"><span class="t">Candidates</span><span class="t" id="candCtx"></span></div>
+      <div class="candidates" id="candList"></div>
+    </div>
+
+    <div class="panel caution">
+      <div class="panel-h"><span class="t">Log · today &amp; trip</span><span class="t" id="logCount">0</span></div>
+      <div class="logrows" id="logRows"><div class="log-empty">Nothing logged yet. Tap NEXT MOVE, then "Log it" on a pick.</div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><span class="t">Scenario / Sim</span><span class="t" id="simMode">LIVE</span></div>
+      <div class="sim-lab">Time beat</div>
+      <div class="sim-beats" id="simBeats"></div>
+      <div class="sim-lab">Weather override</div>
+      <div class="sim-weather" id="simWeather"></div>
+      <div class="sim-live"><span>Overriding live data.</span><button id="simReset">Back to live</button></div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<input type="file" id="hPhoto" accept="image/*" style="display:none">
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* ---------- activity catalogue (mirror of lib/honolulu.ts for instant Sim response) ---------- */
+const WAIKIKI=[21.2793,-157.8292];
+const ACTIVITIES=[
+ {id:'beach-walk',name:'Waikīkī Beach Walk',tag:'EXPLORE',effort:'low',commitment:'dropin',novelty:'familiar',durationMin:60,cost:'free',indoorOutdoor:'outdoor',zone:'walkable',openHour:0,closeHour:24,lat:21.2762,lng:-157.8267},
+ {id:'glow-putt',name:'Glow Putt Mini Golf',tag:'PLAY',effort:'low',commitment:'dropin',novelty:'familiar',durationMin:45,cost:'$',indoorOutdoor:'indoor',zone:'walkable',openHour:10,closeHour:23,lat:21.2823,lng:-157.8301},
+ {id:'intl-market',name:'International Market Place',tag:'EXPLORE',effort:'low',commitment:'dropin',novelty:'familiar',durationMin:60,cost:'$$',indoorOutdoor:'mixed',zone:'walkable',openHour:10,closeHour:21,lat:21.2808,lng:-157.8286},
+ {id:'ohana-ent',name:'Ohana Entertainment Center',tag:'PLAY',effort:'med',commitment:'dropin',novelty:'familiar',durationMin:90,cost:'$$',indoorOutdoor:'indoor',zone:'walkable',openHour:10,closeHour:23,lat:21.2831,lng:-157.8318},
+ {id:'surf-lesson',name:'Surf lesson',tag:'EXPERIENCE',effort:'high',commitment:'reserved',novelty:'unusual',durationMin:120,cost:'$$$',indoorOutdoor:'outdoor',zone:'walkable',openHour:7,closeHour:12,lat:21.2735,lng:-157.8241},
+ {id:'catamaran',name:'Catamaran sail',tag:'EXPERIENCE',effort:'low',commitment:'reserved',novelty:'unusual',durationMin:150,cost:'$$$',indoorOutdoor:'outdoor',zone:'walkable',openHour:12,closeHour:17,lat:21.2748,lng:-157.8281},
+ {id:'snorkel',name:'Turtle Canyon snorkeling',tag:'EXPERIENCE',effort:'med',commitment:'reserved',novelty:'unusual',durationMin:180,cost:'$$$',indoorOutdoor:'outdoor',zone:'walkable',openHour:7,closeHour:11,lat:21.2705,lng:-157.8215},
+ {id:'fireworks',name:'Friday Waikīkī fireworks',tag:'WATCH',effort:'low',commitment:'dropin',novelty:'familiar',durationMin:20,cost:'free',indoorOutdoor:'outdoor',zone:'walkable',openHour:19,closeHour:21,dayOnly:'Fri',eveningOnly:true,lat:21.2818,lng:-157.8355},
+ {id:'lewers',name:'Lewers Lounge',tag:'RELAX',effort:'low',commitment:'dropin',novelty:'familiar',durationMin:90,cost:'$$',indoorOutdoor:'indoor',zone:'walkable',openHour:16,closeHour:24,eveningOnly:true,lat:21.2792,lng:-157.8305},
+ {id:'beach-bars',name:'Beachfront bars',tag:'RELAX',effort:'low',commitment:'dropin',novelty:'familiar',durationMin:90,cost:'$$',indoorOutdoor:'mixed',zone:'walkable',openHour:12,closeHour:24,lat:21.2769,lng:-157.8273},
+ {id:'iolani',name:'ʻIolani Palace',tag:'LEARN',effort:'low',commitment:'dropin',novelty:'unusual',durationMin:90,cost:'$$',indoorOutdoor:'mixed',zone:'rideshare',openHour:9,closeHour:16,lat:21.3066,lng:-157.8583},
+ {id:'homa',name:'Honolulu Museum of Art',tag:'LEARN',effort:'low',commitment:'dropin',novelty:'unusual',durationMin:90,cost:'$$',indoorOutdoor:'indoor',zone:'rideshare',openHour:10,closeHour:18,lat:21.3040,lng:-157.8489},
+ {id:'bishop',name:'Bishop Museum',tag:'LEARN',effort:'low',commitment:'dropin',novelty:'unusual',durationMin:120,cost:'$$',indoorOutdoor:'indoor',zone:'rideshare',openHour:9,closeHour:17,lat:21.3330,lng:-157.8710},
+ {id:'ala-moana',name:'Ala Moana',tag:'EAT_DRINK',effort:'low',commitment:'dropin',novelty:'familiar',durationMin:90,cost:'$$',indoorOutdoor:'mixed',zone:'rideshare',openHour:10,closeHour:21,lat:21.2911,lng:-157.8434},
+ {id:'game-show',name:'Great Big Game Show Honolulu',tag:'PLAY',effort:'med',commitment:'reserved',novelty:'unusual',durationMin:90,cost:'$$',indoorOutdoor:'indoor',zone:'rideshare',openHour:18,closeHour:22,eveningOnly:true,lat:21.2887,lng:-157.8399},
+ {id:'escape-game',name:'The Escape Game Honolulu',tag:'PLAY',effort:'med',commitment:'reserved',novelty:'unusual',durationMin:60,cost:'$$',indoorOutdoor:'indoor',zone:'walkable',openHour:10,closeHour:22,lat:21.2838,lng:-157.8330},
+ {id:'magical-parlour',name:"Waikīkī's Magical Parlour",tag:'WATCH',effort:'low',commitment:'reserved',novelty:'unusual',durationMin:75,cost:'$$',indoorOutdoor:'indoor',zone:'walkable',openHour:18,closeHour:22,eveningOnly:true,lat:21.2801,lng:-157.8295},
+ {id:'mystery-show',name:'The Magical Mystery Show',tag:'WATCH',effort:'low',commitment:'reserved',novelty:'unusual',durationMin:75,cost:'$$',indoorOutdoor:'indoor',zone:'walkable',openHour:18,closeHour:22,eveningOnly:true,lat:21.2810,lng:-157.8299},
+ {id:'scaventour',name:'Scaventour',tag:'PLAY',effort:'med',commitment:'reserved',novelty:'unusual',durationMin:90,cost:'$$',indoorOutdoor:'outdoor',zone:'walkable',openHour:9,closeHour:17,lat:21.2795,lng:-157.8288},
+ {id:'lucky-strike',name:'Lucky Strike',tag:'PLAY',effort:'low',commitment:'dropin',novelty:'familiar',durationMin:60,cost:'$$',indoorOutdoor:'indoor',zone:'rideshare',openHour:11,closeHour:24,lat:21.2905,lng:-157.8420},
+ {id:'dnb',name:"Dave & Buster's",tag:'PLAY',effort:'low',commitment:'dropin',novelty:'familiar',durationMin:90,cost:'$$',indoorOutdoor:'indoor',zone:'rideshare',openHour:11,closeHour:24,lat:21.2898,lng:-157.8412},
+ {id:'rage-room',name:"Break'N Anger",tag:'PLAY',effort:'med',commitment:'reserved',novelty:'unusual',durationMin:45,cost:'$$',indoorOutdoor:'indoor',zone:'rideshare',openHour:11,closeHour:21,lat:21.3195,lng:-157.8665},
+ {id:'karaoke',name:'Private-room karaoke',tag:'PLAY',effort:'low',commitment:'reserved',novelty:'familiar',durationMin:60,cost:'$$',indoorOutdoor:'indoor',zone:'walkable',openHour:17,closeHour:24,eveningOnly:true,lat:21.2827,lng:-157.8312},
+ {id:'blue-note',name:'Blue Note Hawaii',tag:'WATCH',effort:'low',commitment:'reserved',novelty:'unusual',durationMin:90,cost:'$$$',indoorOutdoor:'indoor',zone:'walkable',openHour:19,closeHour:22,eveningOnly:true,lat:21.2807,lng:-157.8296},
+ {id:'auana',name:"Cirque du Soleil ʻAuana",tag:'WATCH',effort:'low',commitment:'reserved',novelty:'unusual',durationMin:80,cost:'$$$',indoorOutdoor:'indoor',zone:'walkable',openHour:17,closeHour:22,eveningOnly:true,lat:21.2836,lng:-157.8321},
+ {id:'first-friday',name:'First Friday (Chinatown)',tag:'EXPLORE',effort:'low',commitment:'dropin',novelty:'unusual',durationMin:120,cost:'free',indoorOutdoor:'outdoor',zone:'rideshare',openHour:17,closeHour:21,dayOnly:'Fri',eveningOnly:true,lat:21.3134,lng:-157.8626},
+ {id:'homa-nights',name:'HoMA Nights',tag:'LEARN',effort:'low',commitment:'dropin',novelty:'unusual',durationMin:120,cost:'$',indoorOutdoor:'mixed',zone:'rideshare',openHour:18,closeHour:21,dayOnly:'Fri',eveningOnly:true,lat:21.3040,lng:-157.8489},
+];
+const ACT_BY_ID={}; ACTIVITIES.forEach(a=>ACT_BY_ID[a.id]=a);
+
+/* Same-day dinner anchor (fixed for this trip) */
+const ANCHOR={name:"Dinner — Duke's",hour:19.5};
+
+/* ---------- state ---------- */
+const state={
+  live:{weather:'clear',tempF:84,sunset:null,soonProb:0},
+  simBeat:null,        // null = live time
+  simWeather:null,     // null = live weather
+  indoorOnly:false,
+  log:[],              // from DB
+  candidates:[],
+  person:'tobi',
+};
+
+const BEATS=[
+ {id:'0930',label:'9:30a',hour:9.5},{id:'1100',label:'11:00a',hour:11},{id:'1330',label:'1:30p',hour:13.5},
+ {id:'1600',label:'4:00p',hour:16},{id:'evening',label:'Evening',hour:20},{id:'satam',label:'Sat AM',hour:9.5,day:6},
+];
+const WEATHERS=[{id:'clear',label:'Clear'},{id:'cloudy',label:'Cloudy'},{id:'rain-soon',label:'Rain soon'},{id:'raining',label:'Raining'}];
+
+/* ---------- helpers ---------- */
+const $=id=>document.getElementById(id);
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function nowLocalHour(){ // Honolulu local decimal hour
+  const p=new Intl.DateTimeFormat('en-US',{timeZone:'Pacific/Honolulu',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date());
+  const h=+p.find(x=>x.type==='hour').value, m=+p.find(x=>x.type==='minute').value; return h+m/60;
+}
+function hnlDayInfo(){
+  const f=new Intl.DateTimeFormat('en-CA',{timeZone:'Pacific/Honolulu',year:'numeric',month:'2-digit',day:'2-digit',weekday:'short'});
+  const parts=f.formatToParts(new Date());
+  const dayKey=parts.filter(p=>['year','month','day'].includes(p.type)).map(p=>p.value).join('-');
+  const wd=parts.find(p=>p.type==='weekday').value;
+  const dow={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6}[wd];
+  return {dayKey,wd,dow};
+}
+function effHour(){ return state.simBeat!=null ? BEATS.find(b=>b.id===state.simBeat).hour : nowLocalHour(); }
+function effDow(){ if(state.simBeat){const b=BEATS.find(b=>b.id===state.simBeat); if(b.day!=null)return b.day;} return hnlDayInfo().dow; }
+function effWeather(){ return state.simWeather || state.live.weather; }
+function dayNameFromDow(d){ return d===5?'Fri':d===6?'Sat':d===0?'Sun':'other'; }
+
+/* ---------- deterministic engine (mirror of server) ---------- */
+// Anchor only applies while we're still before it (with a small grace). Past the
+// dinner hour it no longer constrains picks — otherwise the evening reads as "nothing fits".
+function anchorActive(hour){ return hour < ANCHOR.hour - 0.25; }
+function computeSlack(a,hour){ const buf=a.zone==='walkable'?10:20; return Math.round(ANCHOR.hour*60-(hour*60+a.durationMin+buf)); }
+function passesHard(a,hour,weather,loggedTodayIds,dow){
+  if(loggedTodayIds.has(a.id))return false;
+  if(a.dayOnly && a.dayOnly!==dayNameFromDow(dow))return false;
+  if(a.eveningOnly && hour<17)return false;
+  if(hour<a.openHour||hour>=a.closeHour)return false;
+  if(weather==='raining'&&a.indoorOutdoor==='outdoor')return false;
+  if(anchorActive(hour)&&computeSlack(a,hour)<-15)return false;
+  return true;
+}
+function scoreActivity(a,hour,weather,logged){
+  const lines=[];
+  if(a.novelty==='unusual')lines.push({label:'novelty',value:2});
+  if(a.zone==='walkable')lines.push({label:'walkable',value:1.5});
+  if(weather==='rain-soon'&&a.indoorOutdoor==='indoor')lines.push({label:'beats the rain',value:2});
+  const sameTag=logged.filter(l=>l.tag===a.tag).length;
+  if(sameTag>0)lines.push({label:'repeats '+a.tag.replace('_',' ').toLowerCase()+' ×'+sameTag,value:Math.round(-1.2*sameTag*10)/10});
+  if(a.effort==='high'&&hour>=15)lines.push({label:'high effort, late',value:-2});
+  if(a.cost==='free')lines.push({label:'free',value:0.5});
+  const score=Math.round(lines.reduce((s,l)=>s+l.value,0)*10)/10;
+  return {score,lines};
+}
+function rankLocal(){
+  const hour=effHour(), weather=effWeather(), dow=effDow();
+  const {dayKey}=hnlDayInfo();
+  const logged=state.log.map(l=>({activityId:l.activityId,tag:l.tag,today:l.dayKey===dayKey}));
+  const loggedTodayIds=new Set(logged.filter(l=>l.today).map(l=>l.activityId));
+  let pool=ACTIVITIES.filter(a=>passesHard(a,hour,weather,loggedTodayIds,dow));
+  if(state.indoorOnly)pool=pool.filter(a=>a.indoorOutdoor==='indoor');
+  const anchorOn=anchorActive(hour);
+  let scored=pool.map(a=>{const {score,lines}=scoreActivity(a,hour,weather,logged);
+    return {activity:a,score,breakdown:lines,slack:anchorOn?computeSlack(a,hour):null,walkable:a.zone==='walkable',wildcard:false};});
+  scored.sort((x,y)=>y.score-x.score);
+  const top=scored.slice(0,3), topTags=new Set(top.map(c=>c.activity.tag)), rest=scored.slice(3);
+  const wild=rest.find(c=>c.activity.novelty==='unusual'&&!topTags.has(c.activity.tag))||rest.find(c=>c.activity.novelty==='unusual')||null;
+  if(wild)wild.wildcard=true;
+  const out=[...top]; if(wild)out.push(wild);
+  out.forEach(c=>c.rationale=tmplRationale(c.activity,weather));
+  return out;
+}
+function tmplRationale(a,weather){
+  const b=[];
+  if(weather==='rain-soon'&&a.indoorOutdoor==='indoor')b.push('stays dry if the rain rolls in');
+  else if(a.novelty==='unusual')b.push("something you haven't done yet");
+  else b.push('an easy, familiar win');
+  b.push(a.zone==='walkable'?'right on foot from the beach':'a short rideshare out');
+  if(a.cost==='free')b.push("and it's free");
+  const s=b.join(', '); return s.charAt(0).toUpperCase()+s.slice(1)+'.';
+}
+
+/* ---------- render ---------- */
+function fmtHour(h){const hh=Math.floor(h)%24,mm=Math.round((h-Math.floor(h))*60);const ap=hh>=12?'PM':'AM';const h12=((hh+11)%12)+1;return h12+':'+String(mm).padStart(2,'0')+' '+ap;}
+function costLabel(c){return c==='free'?'FREE':c;}
+function updateStatusBar(){
+  const hour=effHour();
+  $('roClock').textContent=fmtHour(hour);
+  const {wd}=hnlDayInfo(); $('roDay').textContent=(state.simBeat?'SIM · ':'')+ (effDow()===6?'Sat':wd).toUpperCase();
+  const w=effWeather();
+  $('roWeather').textContent={clear:'Clear',cloudy:'Cloudy','rain-soon':'Rain soon',raining:'Raining'}[w];
+  $('roTemp').textContent=state.live.tempF?state.live.tempF+'°F':'';
+  const box=$('roWeatherBox'); box.className='readout w-'+w;
+  // sunset countdown
+  if(state.live.sunset){
+    const ss=new Date(state.live.sunset); const ssh=ss.getHours()+ss.getMinutes()/60;
+    $('roSunset').textContent=fmtHour(ssh);
+    const diff=Math.round((ssh-hour)*60);
+    $('roSunsetIn').textContent=diff>0?('in '+(diff>=60?Math.floor(diff/60)+'h '+(diff%60)+'m':diff+'m')):'set';
+  } else { $('roSunset').textContent='—'; }
+  $('simMode').textContent=(state.simBeat||state.simWeather)?'SIM':'LIVE';
+  // rain banner
+  $('rainBanner').classList.toggle('show', effWeather()==='rain-soon' && !state.indoorOnly);
+}
+function slackClass(s){return s>=30?'good':s>=0?'tight':'bad';}
+function renderCandidates(){
+  const list=$('candList'); $('candPanel').style.display='block';
+  const hour=effHour();
+  $('candCtx').textContent=fmtHour(hour)+' · '+effWeather().replace('-',' ');
+  if(!state.candidates.length){ list.innerHTML='<div class="cand-empty">Nothing fits this slot. Try a different time beat, or clear the indoor-only filter.</div>'; drawMap(); return; }
+  list.innerHTML=state.candidates.map((c,i)=>{
+    const a=c.activity;
+    const cls=c.wildcard?'wild':(c.slack!=null&&c.slack<30?'caution':'ok');
+    const brk=c.breakdown.map(b=>'<b>'+(b.value>0?'+':'')+b.value+'</b> '+esc(b.label)).join(' · ')||'baseline';
+    const stats=[a.durationMin+' min', costLabel(a.cost), a.zone==='walkable'?'walk':'rideshare'].map(s=>'<span class="cand-stat">'+esc(s)+'</span>').join('');
+    let slackHtml='';
+    if(c.slack!=null){const sc=slackClass(c.slack);const sign=c.slack>=0?'+':'';slackHtml='<div class="cand-slack '+sc+'">vs '+esc(ANCHOR.name)+': fits, '+sign+c.slack+' min buffer</div>';}
+    return '<div class="cand '+cls+'" style="animation-delay:'+(i*70)+'ms" data-id="'+a.id+'">'+
+      (c.wildcard?'<span class="cand-wildtag">◆ Something different</span>':'')+
+      '<div class="cand-top"><div class="cand-name">'+esc(a.name)+'</div><span class="cand-tag">'+esc(a.tag.replace('_',' '))+'</span></div>'+
+      '<div class="cand-rat">'+esc(c.rationale)+'</div>'+
+      '<div class="cand-score"><span class="num '+(c.score<0?'neg':'')+'">'+(c.score>=0?'+':'')+c.score+'</span><span class="cand-break">'+brk+'</span></div>'+
+      '<div class="cand-stats">'+stats+'</div>'+ slackHtml+
+      '<div class="cand-actions"><button class="cand-btn log" data-log="'+a.id+'">Log it</button><button class="cand-btn" data-pass="'+a.id+'">Pass</button></div>'+
+    '</div>';
+  }).join('');
+  list.querySelectorAll('[data-log]').forEach(b=>b.onclick=()=>logActivity(b.dataset.log));
+  list.querySelectorAll('[data-pass]').forEach(b=>b.onclick=()=>passActivity(b.dataset.pass));
+  drawMap();
+}
+function renderLog(){
+  const rows=$('logRows'); $('logCount').textContent=state.log.length;
+  if(!state.log.length){rows.innerHTML='<div class="log-empty">Nothing logged yet. Tap NEXT MOVE, then "Log it" on a pick.</div>';return;}
+  rows.innerHTML=state.log.map(l=>{
+    const t=new Date(l.loggedAt); const hh=t.getHours(),mm=t.getMinutes();
+    return '<div class="logrow"><span class="lr-tag">'+esc(l.tag.replace('_',' '))+'</span>'+
+      '<span class="lr-name">'+esc(l.name)+'</span><span class="lr-who">'+esc(l.person)+'</span>'+
+      '<span class="lr-time">'+String(((hh+11)%12)+1)+':'+String(mm).padStart(2,'0')+(hh>=12?'p':'a')+'</span>'+
+      '<button class="lr-del" data-del="'+l.id+'" aria-label="Undo">×</button></div>';
+  }).join('');
+  rows.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>unlog(+b.dataset.del));
+}
+
+/* ---------- actions ---------- */
+let toastT=null;
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2200);}
+
+async function nextMove(refine){
+  const btn=$('nextMoveBtn'); btn.disabled=true;
+  // Instant deterministic picks first (feels immediate, always works).
+  state.candidates=rankLocal(); renderCandidates();
+  $('aiNote').textContent='';
+  // Then ask the server for Claude-upgraded rationale + refinement (best-effort).
+  try{
+    const {dayKey}=hnlDayInfo();
+    const logged=state.log.map(l=>({activityId:l.activityId,tag:l.tag,today:l.dayKey===dayKey}));
+    const res=await fetch('/api/honolulu/next-move',{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({hour:effHour(),weather:effWeather(),dayKey,logged,anchor:ANCHOR,refine:refine||'',indoorOnly:state.indoorOnly})}).then(r=>r.json());
+    if(res.ok&&res.candidates){ state.candidates=res.candidates.map(c=>({...c,activity:ACT_BY_ID[c.activity.id]||c.activity})); renderCandidates();
+      const note=$('aiNote');
+      if(res.note){note.className='ainote';note.textContent='▶ '+res.note;}
+      else if(res.aiCode==='billing'){note.className='ainote hint';note.textContent='Picks are live — add Anthropic credits for AI-written rationales & free-text refining.';}
+      else note.textContent='';
+    }
+  }catch(e){/* deterministic picks already shown */}
+  btn.disabled=false;
+}
+function passActivity(id){ state.candidates=state.candidates.filter(c=>c.activity.id!==id); renderCandidates(); }
+async function logActivity(id){
+  const a=ACT_BY_ID[id]; if(!a)return;
+  const {dayKey}=hnlDayInfo();
+  const optimistic={id:'tmp'+Date.now(),activityId:id,name:a.name,tag:a.tag,person:state.person,dayKey,loggedAt:new Date().toISOString()};
+  state.log.unshift(optimistic); renderLog();
+  state.candidates=state.candidates.filter(c=>c.activity.id!==id); renderCandidates();
+  toast('Logged: '+a.name);
+  try{
+    const res=await fetch('/api/honolulu/log',{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({activityId:id,name:a.name,tag:a.tag,person:state.person,dayKey})}).then(r=>r.json());
+    if(res.ok&&res.entry){ const i=state.log.findIndex(l=>l.id===optimistic.id); if(i>=0)state.log[i]=res.entry; renderLog(); }
+  }catch(e){ toast('Saved locally (offline)'); }
+}
+async function unlog(id){
+  state.log=state.log.filter(l=>l.id!==id); renderLog(); drawMap();
+  try{ await fetch('/api/honolulu/log?id='+id,{method:'DELETE'}); }catch(e){}
+}
+
+/* ---------- map ---------- */
+let hmap=null, markerLayer=null, userMarker=null;
+function initMap(){
+  hmap=L.map('hmap',{zoomControl:false,attributionControl:false}).setView(WAIKIKI,13);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,crossOrigin:true}).addTo(hmap);
+  markerLayer=L.layerGroup().addTo(hmap);
+  drawMap();
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(p=>{
+      const ll=[p.coords.latitude,p.coords.longitude];
+      if(!userMarker)userMarker=L.marker(ll,{icon:L.divIcon({className:'',html:'<div class="userdot"></div>',iconSize:[14,14],iconAnchor:[7,7]}),zIndexOffset:1000}).addTo(hmap);
+      else userMarker.setLatLng(ll);
+    },()=>{},{enableHighAccuracy:true,timeout:8000,maximumAge:10000});
+  }
+}
+function drawMap(){
+  if(!markerLayer)return; markerLayer.clearLayers();
+  const candIds={}; state.candidates.forEach(c=>candIds[c.activity.id]=c.wildcard?'wild':'cand');
+  const loggedIds=new Set(state.log.map(l=>l.activityId));
+  ACTIVITIES.forEach(a=>{
+    let col='var(--dim)',z=0;
+    if(loggedIds.has(a.id)){col='var(--caution)';}
+    else if(candIds[a.id]==='wild'){col='var(--wild)';z=800;}
+    else if(candIds[a.id]==='cand'){col='var(--ok)';z=600;}
+    const isC=!!candIds[a.id];
+    const html='<div class="hm-pin" style="border:2px solid '+col+';color:'+col+';'+(isC?'':'opacity:.55')+'">'+(a.name[0])+'</div>';
+    const m=L.marker([a.lat,a.lng],{icon:L.divIcon({className:'',html,iconSize:[24,24],iconAnchor:[12,12]}),zIndexOffset:z}).addTo(markerLayer);
+    m.bindTooltip(a.name,{direction:'top'});
+    m.on('click',()=>{ tripPhotoTarget=a.id; $('hPhoto').click(); });
+  });
+}
+
+/* ---------- per-activity photo (reuses shared /api/photos) ---------- */
+let tripPhotoTarget=null;
+$('hPhoto').onchange=function(e){
+  const f=e.target.files&&e.target.files[0]; e.target.value=''; if(!f||!tripPhotoTarget)return;
+  const a=ACT_BY_ID[tripPhotoTarget];
+  toast('Uploading photo…');
+  const fd=new FormData(); fd.append('file',f); fd.append('kind','gallery'); fd.append('person',state.person); fd.append('tripSite','hnl-'+tripPhotoTarget);
+  fetch('/api/photos',{method:'POST',body:fd}).then(r=>r.json()).then(d=>{ toast(d.error?d.error:('Photo added to '+(a?a.name:'spot'))); }).catch(()=>toast('Upload failed'));
+};
+
+/* ---------- sim panel ---------- */
+function buildSim(){
+  $('simBeats').innerHTML=BEATS.map(b=>'<button class="sim-btn" data-beat="'+b.id+'">'+b.label+'</button>').join('');
+  $('simWeather').innerHTML=WEATHERS.map(w=>'<button class="sim-btn wbtn w-'+w.id+'" data-w="'+w.id+'">'+w.label+'</button>').join('');
+  $('simBeats').querySelectorAll('[data-beat]').forEach(b=>b.onclick=()=>{ state.simBeat=state.simBeat===b.dataset.beat?null:b.dataset.beat; syncSim(); });
+  $('simWeather').querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{ state.simWeather=state.simWeather===b.dataset.w?null:b.dataset.w; state.indoorOnly=false; syncSim(); });
+  $('simReset').onclick=()=>{ state.simBeat=null; state.simWeather=null; state.indoorOnly=false; syncSim(); };
+}
+function syncSim(){
+  $('simBeats').querySelectorAll('[data-beat]').forEach(b=>b.classList.toggle('active',state.simBeat===b.dataset.beat));
+  $('simWeather').querySelectorAll('[data-w]').forEach(b=>{b.classList.toggle('active',state.simWeather===b.dataset.w);b.className='sim-btn wbtn w-'+b.dataset.w+(state.simWeather===b.dataset.w?' active':'');});
+  updateStatusBar();
+  if($('candPanel').style.display!=='none') nextMove($('refineInput').value.trim());
+}
+
+/* ---------- boot ---------- */
+$('nextMoveBtn').onclick=()=>nextMove($('refineInput').value.trim());
+$('refineBtn').onclick=()=>nextMove($('refineInput').value.trim());
+$('refineInput').addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.nativeEvent?.isComposing&&e.keyCode!==229){ nextMove(e.target.value.trim()); } });
+$('rainGo').onclick=()=>{ state.indoorOnly=true; $('rainBanner').classList.remove('show'); nextMove($('refineInput').value.trim()); toast('Rerouted to indoor-only'); };
+
+async function loadLive(){
+  try{ const w=await fetch('/api/honolulu/weather').then(r=>r.json());
+    state.live.weather=w.weather; state.live.tempF=w.tempF; state.live.sunset=w.sunset; state.live.soonProb=w.soonProb;
+  }catch(e){}
+  updateStatusBar();
+}
+async function loadLog(){ try{ const d=await fetch('/api/honolulu/log').then(r=>r.json()); if(d.ok)state.log=d.log; renderLog(); drawMap(); }catch(e){} }
+
+initMap(); buildSim(); updateStatusBar(); loadLive(); loadLog();
+setInterval(updateStatusBar,30000);
+</script>
+</body>
+</html>

@@ -74,3 +74,23 @@ export const photos = pgTable(
     tripSiteIdx: index("photos_trip_site_idx").on(t.tripSite),
   }),
 )
+
+// Shared "what we've done" manifest for the Honolulu Mission Control console (and any
+// future decision-console location). One row per logged activity; both travellers see
+// the same log, and the scoring engine reads it to bias away from repeated tags.
+export const tripLog = pgTable(
+  "trip_log",
+  {
+    id: serial("id").primaryKey(),
+    trip: text("trip").notNull().default("honolulu"), // which location console
+    activityId: text("activity_id").notNull(), // e.g. "surf-lesson"
+    name: text("name").notNull(),
+    tag: text("tag").notNull(), // PLAY | EXPERIENCE | WATCH | EXPLORE | LEARN | RELAX | EAT_DRINK
+    person: text("person").notNull().default("tobi"),
+    dayKey: text("day_key").notNull(), // local calendar day, e.g. "2026-09-05", for "today" grouping
+    loggedAt: timestamp("logged_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    tripIdx: index("trip_log_trip_idx").on(t.trip),
+  }),
+)

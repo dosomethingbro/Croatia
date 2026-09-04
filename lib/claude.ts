@@ -4,14 +4,38 @@ import { join } from "node:path"
 
 export const CLAUDE_MODEL = "claude-sonnet-4-5-20250929"
 
-let _client: Anthropic | null = null
-export function claude(): Anthropic {
-  if (!_client) {
-    const apiKey = process.env.ANTHROPIC_API_KEY
-    if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not set")
-    _client = new Anthropic({ apiKey })
+// Every configured key, in priority order. Multiple keys let us fail over when one
+// runs out of credit or gets rate-limited, so the whole app keeps working.
+export function apiKeys(): string[] {
+  return [process.env.ANTHROPIC_API_KEY, process.env.ANTHROPIC_API_KEY_2, process.env.ANTHROPIC_API_KEY_3].filter(
+    (k): k is string => !!k,
+  )
+}
+
+const _clients = new Map<string, Anthropic>()
+function clientFor(apiKey: string): Anthropic {
+  let c = _clients.get(apiKey)
+  if (!c) {
+    c = new Anthropic({ apiKey })
+    _clients.set(apiKey, c)
   }
-  return _client
+  return c
+}
+
+export function claude(): Anthropic {
+  const keys = apiKeys()
+  if (!keys.length) throw new Error("ANTHROPIC_API_KEY is not set")
+  return clientFor(keys[0])
+}
+
+// Errors worth retrying on the NEXT key (this key is exhausted/blocked, another may work).
+function shouldFailover(err: unknown): boolean {
+  const e = err as { status?: number; message?: string }
+  const raw = (e?.message || "").toLowerCase()
+  if (e?.status === 401) return true // bad/rejected key
+  if (e?.status === 429) return true // rate limited
+  if (e?.status === 400 && (raw.includes("credit balance") || raw.includes("too low"))) return true // out of credit
+  return false
 }
 
 // Load the editable trip-context seed (CLAUDE.md). Cached after first read.
@@ -47,19 +71,32 @@ export async function askClaude(opts: {
   const content =
     typeof opts.user === "string" ? [{ type: "text" as const, text: opts.user }] : opts.user
 
-  const res = await claude().messages.create({
-    model: CLAUDE_MODEL,
-    max_tokens: opts.maxTokens ?? 1800,
-    temperature: opts.temperature ?? 0.7,
-    system,
-    messages: [{ role: "user", content: content as Anthropic.MessageParam["content"] }],
-  })
+  const keys = apiKeys()
+  if (!keys.length) throw new Error("ANTHROPIC_API_KEY is not set")
 
-  return res.content
-    .filter((b): b is Anthropic.TextBlock => b.type === "text")
-    .map((b) => b.text)
-    .join("\n")
-    .trim()
+  let lastErr: unknown
+  for (let i = 0; i < keys.length; i++) {
+    try {
+      const res = await clientFor(keys[i]).messages.create({
+        model: CLAUDE_MODEL,
+        max_tokens: opts.maxTokens ?? 1800,
+        temperature: opts.temperature ?? 0.7,
+        system,
+        messages: [{ role: "user", content: content as Anthropic.MessageParam["content"] }],
+      })
+      return res.content
+        .filter((b): b is Anthropic.TextBlock => b.type === "text")
+        .map((b) => b.text)
+        .join("\n")
+        .trim()
+    } catch (err) {
+      lastErr = err
+      // Only advance to the next key when THIS key is the problem (credit/rate/auth).
+      if (i < keys.length - 1 && shouldFailover(err)) continue
+      throw err
+    }
+  }
+  throw lastErr
 }
 
 // Turn a raw Claude/Anthropic SDK error into a friendly, actionable message + code.

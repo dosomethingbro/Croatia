@@ -2,12 +2,12 @@
 
 import { useEffect } from "react"
 
-// The actual app is the static single-file experience at /dubrovnik.html.
-// This root route immediately forwards there so the v0 preview (which loads "/")
-// lands on the app instead of an empty React route.
+// The app is a family of trip consoles; the entry point is the trip picker at
+// /trips.html. This root route forwards there so the v0 preview (which loads "/")
+// lands on the overview instead of an empty React route.
 export default function Home() {
   useEffect(() => {
-    window.location.replace("/dubrovnik.html")
+    window.location.replace("/trips.html")
   }, [])
 
   return (
@@ -26,7 +26,7 @@ export default function Home() {
       }}
     >
       <p>
-        Loading&hellip; <a href="/dubrovnik.html" style={{ color: "#C9A24B" }}>Enter</a>
+        Loading&hellip; <a href="/trips.html" style={{ color: "#C9A24B" }}>Enter</a>
       </p>
     </main>
   )
