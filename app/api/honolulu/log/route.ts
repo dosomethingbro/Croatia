@@ -6,6 +6,17 @@ import { NextResponse } from "next/server"
 export const dynamic = "force-dynamic"
 
 const TRIP = "honolulu"
+const TAGS = new Set(["PLAY", "EXPERIENCE", "WATCH", "EXPLORE", "LEARN", "RELAX", "EAT_DRINK"])
+const PEOPLE = new Set(["tobi", "luke"])
+
+// Optional shared-passphrase gate for writes. If HONOLULU_TRIP_SECRET is set, POST/DELETE
+// must send a matching `x-trip-key` header; if it's unset the log stays open (private
+// two-person trip). This lets the couple lock down writes without any code change.
+function writeAllowed(req: Request): boolean {
+  const secret = process.env.HONOLULU_TRIP_SECRET
+  if (!secret) return true
+  return req.headers.get("x-trip-key") === secret
+}
 
 // GET /api/honolulu/log -> the shared manifest (both travellers see the same log).
 export async function GET() {
@@ -24,21 +35,21 @@ export async function GET() {
 
 // POST { activityId, name, tag, person, dayKey } -> log an activity as done.
 export async function POST(req: Request) {
+  if (!writeAllowed(req)) return NextResponse.json({ ok: false, error: "Not authorized" }, { status: 401 })
   try {
     const b = await req.json()
-    if (!b?.activityId || !b?.name || !b?.tag || !b?.dayKey) {
-      return NextResponse.json({ ok: false, error: "Missing fields" }, { status: 400 })
+    // Validate + clamp everything client-supplied — never trust the body.
+    const activityId = String(b?.activityId ?? "").slice(0, 64)
+    const name = String(b?.name ?? "").slice(0, 120)
+    const tag = String(b?.tag ?? "")
+    const person = PEOPLE.has(String(b?.person)) ? String(b.person) : "tobi"
+    const dayKey = String(b?.dayKey ?? "")
+    if (!activityId || !name || !TAGS.has(tag) || !/^\d{4}-\d{2}-\d{2}$/.test(dayKey)) {
+      return NextResponse.json({ ok: false, error: "Invalid fields" }, { status: 400 })
     }
     const [row] = await db
       .insert(tripLog)
-      .values({
-        trip: TRIP,
-        activityId: String(b.activityId),
-        name: String(b.name),
-        tag: String(b.tag),
-        person: String(b.person || "tobi"),
-        dayKey: String(b.dayKey),
-      })
+      .values({ trip: TRIP, activityId, name, tag, person, dayKey })
       .returning()
     return NextResponse.json({ ok: true, entry: row })
   } catch (e) {
@@ -49,6 +60,7 @@ export async function POST(req: Request) {
 
 // DELETE /api/honolulu/log?id=123 -> undo a log entry.
 export async function DELETE(req: Request) {
+  if (!writeAllowed(req)) return NextResponse.json({ ok: false, error: "Not authorized" }, { status: 401 })
   try {
     const id = Number(new URL(req.url).searchParams.get("id"))
     if (!id) return NextResponse.json({ ok: false, error: "Missing id" }, { status: 400 })

@@ -86,8 +86,10 @@ export interface Candidate {
   wildcard: boolean
 }
 
+// The caller builds `now` at UTC noon of the Honolulu calendar day (see the route), so we
+// read the weekday in UTC — this avoids the server's own timezone shifting the date.
 function dayName(d: Date): "Fri" | "Sat" | "Sun" | "other" {
-  const n = d.getDay()
+  const n = d.getUTCDay()
   return n === 5 ? "Fri" : n === 6 ? "Sat" : n === 0 ? "Sun" : "other"
 }
 
@@ -142,6 +144,64 @@ export function scoreActivity(a: Activity, ctx: {
   return { score, breakdown: lines }
 }
 
+// ---- Free-text refinement → deterministic, explainable soft nudges ----
+// Claude interprets the refine text when it's available; this is the always-on fallback so
+// refinement still works when the AI is down. Crucially it's applied to the FULL scored pool
+// BEFORE trimming to top-3+wildcard, so a refine can genuinely surface an activity that
+// wasn't already going to be shown — not merely reorder the four you'd see anyway.
+type RefineRule = { label: string; adj: (a: Activity) => number }
+
+export function buildRefineRules(text: string): RefineRule[] {
+  const low = ` ${text.toLowerCase()} `
+  // Match on a LEADING word boundary but no trailing one, so plurals/gerunds still hit
+  // ("museum" matches "museums", "relax" matches "relaxing"). This is the fix for the spec's
+  // own example "nothing involving museums".
+  const has = (re: RegExp) => re.test(low)
+  const neg = /\b(no|not|without|avoid|skip|none|nothing|don'?t|do not|hate|except|rather not|less)\b/.test(low)
+  const rules: RefineRule[] = []
+  if (has(/\b(weird|unusual|different|strange|off.?beat|random|quirky|surpris|wild|novel)/))
+    rules.push({ label: "unusual", adj: (a) => (a.novelty === "unusual" ? 1.5 : -0.75) })
+  if (has(/\b(museum|art|history|historic|cultur|learn|educational)/))
+    rules.push({ label: neg ? "no museums" : "culture", adj: (a) => (a.tag === "LEARN" ? (neg ? -6 : 2) : 0) })
+  if (has(/\b(cheap|budget|free|affordable|inexpensive|save money|expensive|pricey)/))
+    rules.push({ label: "budget", adj: (a) => (a.cost === "free" ? 2 : a.cost === "$" ? 1 : a.cost === "$$$" ? -2.5 : 0) })
+  if (has(/\b(splurge|treat|fancy|special|blow.?out)/) && !neg)
+    rules.push({ label: "splurge", adj: (a) => (a.cost === "$$$" ? 1.5 : a.cost === "free" ? -0.5 : 0) })
+  if (has(/\b(chill|relax|low.?key|mellow|calm|lazy|easygoing|easy.going|slow)/))
+    rules.push({ label: "low-key", adj: (a) => (a.effort === "low" ? 1 : 0) + (a.tag === "RELAX" ? 1.5 : 0) - (a.effort === "high" ? 2 : 0) })
+  if (has(/\b(active|adventure|adrenaline|energetic|exciting|thrill|sporty)/) && !neg)
+    rules.push({ label: "high-energy", adj: (a) => (a.effort === "high" ? 2 : a.effort === "med" ? 1 : -0.5) })
+  if (has(/\b(indoor|inside|air.?con|out of the (sun|heat))/))
+    rules.push({ label: neg ? "not indoor" : "indoor", adj: (a) => (a.indoorOutdoor === "indoor" ? (neg ? -2.5 : 2) : 0) })
+  if (has(/\b(outdoor|outside|beach|ocean|water|sunshine|nature|fresh air)/) && !neg)
+    rules.push({ label: "outdoor", adj: (a) => (a.indoorOutdoor === "outdoor" ? 2 : a.indoorOutdoor === "mixed" ? 1 : -0.5) })
+  if (has(/\b(close|near|walk|on foot|nearby|short trip)/))
+    rules.push({ label: "close by", adj: (a) => (a.zone === "walkable" ? 2 : -2) })
+  if (has(/\b(quick|short|fast|little time|hour or less|not long)/))
+    rules.push({ label: "quick", adj: (a) => (a.durationMin <= 60 ? 1.5 : a.durationMin >= 150 ? -2 : 0) })
+  if (has(/\b(eat|food|drink|hungry|dinner|lunch|brunch|bar|cocktail|coffee|dessert)/) && !neg)
+    rules.push({ label: "food & drink", adj: (a) => (a.tag === "EAT_DRINK" ? 2.5 : a.tag === "RELAX" ? 1 : 0) })
+  if (has(/\b(show|music|live|perform|concert|theatre|theater|comedy)/) && !neg)
+    rules.push({ label: "a show", adj: (a) => (a.tag === "WATCH" ? 2 : 0) })
+  return rules
+}
+
+// Returns a new scored list with nudges applied, plus whether anything matched (so the
+// caller/UI can honestly say the refinement had no effect rather than pretend it worked).
+export function applyRefine(scored: Candidate[], text: string): { candidates: Candidate[]; matched: boolean } {
+  const rules = buildRefineRules(text)
+  if (!rules.length) return { candidates: scored, matched: false }
+  const label = `"${text.slice(0, 28)}"`
+  const out = scored.map((c) => {
+    let adj = 0
+    for (const r of rules) adj += r.adj(c.activity)
+    adj = Math.round(adj * 10) / 10
+    if (!adj) return c
+    return { ...c, score: Math.round((c.score + adj) * 10) / 10, breakdown: [...c.breakdown, { label, value: adj }] }
+  })
+  return { candidates: out, matched: true }
+}
+
 // Full ranking + wildcard pick. Returns top candidates with the wildcard flagged.
 export function rankCandidates(ctx: {
   now: Date
@@ -150,6 +210,7 @@ export function rankCandidates(ctx: {
   logged: LoggedItem[]
   anchor: Anchor | null
   indoorOnly?: boolean
+  refine?: string
 }): Candidate[] {
   const loggedTodayIds = new Set(ctx.logged.filter((l) => l.today).map((l) => l.activityId))
 
@@ -158,7 +219,7 @@ export function rankCandidates(ctx: {
   )
   if (ctx.indoorOnly) pool = pool.filter((a) => a.indoorOutdoor === "indoor")
 
-  const scored: Candidate[] = pool.map((a) => {
+  let scored: Candidate[] = pool.map((a) => {
     const { score, breakdown } = scoreActivity(a, { hour: ctx.hour, weather: ctx.weather, logged: ctx.logged })
     return {
       activity: a,
@@ -171,12 +232,17 @@ export function rankCandidates(ctx: {
     }
   })
 
+  // Refinement nudges the WHOLE pool before we trim, so "something weird" can pull a
+  // genuinely off-beat option up into the visible picks.
+  if (ctx.refine) scored = applyRefine(scored, ctx.refine).candidates
+
   scored.sort((x, y) => y.score - x.score)
   const top = scored.slice(0, 3)
   const topTags = new Set(top.map((c) => c.activity.tag))
 
-  // Wildcard: an unusual pick on a tag not already in the top 3.
-  const rest = scored.slice(3)
+  // Wildcard: an unusual pick on a tag not already in the top 3. Exclude anything the
+  // refinement pushed negative — otherwise "no museums" could reappear as the wildcard.
+  const rest = scored.slice(3).filter((c) => c.score >= 0)
   const wildcard =
     rest.find((c) => c.activity.novelty === "unusual" && !topTags.has(c.activity.tag)) ??
     rest.find((c) => c.activity.novelty === "unusual") ??

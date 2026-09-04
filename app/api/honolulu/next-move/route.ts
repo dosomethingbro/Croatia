@@ -32,25 +32,13 @@ export async function POST(req: Request) {
   const anchor: Anchor | null = body.anchor || null
   const refine: string = (body.refine || "").toString().slice(0, 200)
   const indoorOnly: boolean = !!body.indoorOnly
-  const now = body.dayKey ? new Date(body.dayKey + "T" + String(Math.floor(hour)).padStart(2, "0") + ":00:00") : new Date()
+  // Build the reference date at UTC noon of the Honolulu calendar day so weekday detection
+  // (Fri/Sat/Sun-only activities) never shifts under the server's own timezone.
+  const now = body.dayKey && /^\d{4}-\d{2}-\d{2}$/.test(body.dayKey) ? new Date(body.dayKey + "T12:00:00Z") : new Date()
 
-  let candidates: Candidate[] = rankCandidates({ now, hour, weather, logged, anchor, indoorOnly })
-
-  // Apply free-text refinement as a soft re-rank BEFORE trimming, so "no museums" etc.
-  // demotes rather than hard-removing (still explainable — we tag why).
-  if (refine) {
-    const low = refine.toLowerCase()
-    const wantsWeird = /weird|unusual|different|strange|off.?beat|random/.test(low)
-    const noMuseum = /no |not |without |avoid |skip /.test(low) && /museum|learn|art|history/.test(low)
-    candidates = candidates
-      .map((c) => {
-        let adj = 0
-        if (wantsWeird && c.activity.novelty === "unusual") adj += 1.5
-        if (noMuseum && c.activity.tag === "LEARN") adj -= 5
-        return adj ? { ...c, score: Math.round((c.score + adj) * 10) / 10, breakdown: [...c.breakdown, { label: `“${refine.slice(0, 24)}”`, value: adj }] } : c
-      })
-      .sort((a, b) => b.score - a.score)
-  }
+  // Refinement is applied deterministically INSIDE rankCandidates, on the full pool before
+  // trimming — so it can surface a new option, and it works even when Claude is unavailable.
+  let candidates: Candidate[] = rankCandidates({ now, hour, weather, logged, anchor, indoorOnly, refine })
 
   // Upgrade rationales with Claude (best-effort).
   let claudeNote: string | null = null

@@ -220,7 +220,10 @@ a{color:inherit}
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-/* ---------- activity catalogue (mirror of lib/honolulu.ts for instant Sim response) ---------- */
+/* ---------- activity catalogue ----------
+   This hardcoded copy is only an OFFLINE SEED for instant first paint. On load we fetch the
+   authoritative catalogue from GET /api/honolulu/next-move (lib/honolulu.ts) and replace this
+   in place, so activity data (hours, price, coords) has a single source of truth on the server. */
 const WAIKIKI=[21.2793,-157.8292];
 const ACTIVITIES=[
  {id:'beach-walk',name:'Waikīkī Beach Walk',tag:'EXPLORE',effort:'low',commitment:'dropin',novelty:'familiar',durationMin:60,cost:'free',indoorOutdoor:'outdoor',zone:'walkable',openHour:0,closeHour:24,lat:21.2762,lng:-157.8267},
@@ -411,6 +414,10 @@ function renderLog(){
 /* ---------- actions ---------- */
 let toastT=null;
 function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2200);}
+// Optional shared write-passphrase. Set once via ?key=… (persists per device); only needed
+// if the trip owner enabled HONOLULU_TRIP_SECRET on the server. No effect otherwise.
+function tripKey(){ try{ const u=new URLSearchParams(location.search).get('key'); if(u)localStorage.setItem('hnlTripKey',u); return localStorage.getItem('hnlTripKey')||''; }catch(e){ return ''; } }
+function writeHeaders(extra){ const h=Object.assign({},extra||{}); const k=tripKey(); if(k)h['x-trip-key']=k; return h; }
 
 async function nextMove(refine){
   const btn=$('nextMoveBtn'); btn.disabled=true;
@@ -441,14 +448,22 @@ async function logActivity(id){
   state.candidates=state.candidates.filter(c=>c.activity.id!==id); renderCandidates();
   toast('Logged: '+a.name);
   try{
-    const res=await fetch('/api/honolulu/log',{method:'POST',headers:{'content-type':'application/json'},
+    const res=await fetch('/api/honolulu/log',{method:'POST',headers:writeHeaders({'content-type':'application/json'}),
       body:JSON.stringify({activityId:id,name:a.name,tag:a.tag,person:state.person,dayKey})}).then(r=>r.json());
     if(res.ok&&res.entry){ const i=state.log.findIndex(l=>l.id===optimistic.id); if(i>=0)state.log[i]=res.entry; renderLog(); }
-  }catch(e){ toast('Saved locally (offline)'); }
+    else { // server rejected (e.g. locked) — roll back the optimistic entry so the log stays honest
+      state.log=state.log.filter(l=>l.id!==optimistic.id); renderLog(); drawMap();
+      toast(res.error==='Not authorized'?'Log is locked on this device':(res.error||'Could not log'));
+    }
+  }catch(e){ toast('Saved locally (offline)'); } // network error: keep optimistic entry
 }
 async function unlog(id){
+  const prev=state.log.slice();
   state.log=state.log.filter(l=>l.id!==id); renderLog(); drawMap();
-  try{ await fetch('/api/honolulu/log?id='+id,{method:'DELETE'}); }catch(e){}
+  try{
+    const res=await fetch('/api/honolulu/log?id='+id,{method:'DELETE',headers:writeHeaders()}).then(r=>r.json());
+    if(!res.ok){ state.log=prev; renderLog(); drawMap(); toast(res.error==='Not authorized'?'Log is locked on this device':'Could not remove'); }
+  }catch(e){/* offline: leave removed locally */}
 }
 
 /* ---------- map ---------- */
@@ -521,8 +536,20 @@ async function loadLive(){
   updateStatusBar();
 }
 async function loadLog(){ try{ const d=await fetch('/api/honolulu/log').then(r=>r.json()); if(d.ok)state.log=d.log; renderLog(); drawMap(); }catch(e){} }
+// Replace the offline seed with the server's authoritative catalogue (single source of truth).
+async function loadCatalogue(){
+  try{
+    const d=await fetch('/api/honolulu/next-move').then(r=>r.json());
+    if(d&&d.ok&&Array.isArray(d.activities)&&d.activities.length){
+      ACTIVITIES.length=0; d.activities.forEach(a=>ACTIVITIES.push(a));
+      for(const k in ACT_BY_ID)delete ACT_BY_ID[k]; ACTIVITIES.forEach(a=>ACT_BY_ID[a.id]=a);
+      if(Array.isArray(d.center)&&d.center.length===2){WAIKIKI[0]=d.center[0];WAIKIKI[1]=d.center[1];}
+      drawMap();
+    }
+  }catch(e){/* offline: keep the seed */}
+}
 
-initMap(); buildSim(); updateStatusBar(); loadLive(); loadLog();
+initMap(); buildSim(); updateStatusBar(); loadCatalogue(); loadLive(); loadLog();
 setInterval(updateStatusBar,30000);
 </script>
 </body>
