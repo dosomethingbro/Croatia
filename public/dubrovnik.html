@@ -634,6 +634,10 @@ footer{text-align:center;color:var(--dim);font-size:10.5px;font-family:var(--mon
 #smap .cc-mk{animation:ccPop .5s ease}
 @keyframes ccPop{from{opacity:0;transform:translate(-50%,-50%) scale(.6)}to{opacity:1}}
 #smap .cc-arrowhead{animation:ccFade .5s ease}
+/* Keyless OSM tiles recoloured for night mode. Scoped to the tile layer's own container
+   (via Leaflet's className option) so markers and overlays keep their true colours. */
+.tiles-night{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.92) saturate(.55)}
+.tiles-day{filter:saturate(.85)}
 </style>
 </head>
 <body>
@@ -1553,11 +1557,14 @@ function gotoMapStop(id){
 }
 
 /* ================= map ================= */
+// CARTO basemaps now require an API key (they render "API KEY REQUIRED" watermarks), so every
+// map uses keyless OpenStreetMap tiles; night mode is a CSS recolour (.tiles-night).
+const OSM_TILES='https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const map = L.map('map',{zoomControl:false}).setView([42.6440,18.1090],14);
 map.attributionControl.setPrefix(false);
 const TILES = {
-  night: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:20,attribution:'© OpenStreetMap © CARTO'}),
-  day:   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:20,attribution:'© OpenStreetMap © CARTO'})
+  night: L.tileLayer(OSM_TILES,{maxZoom:19,className:'tiles-night',attribution:'© OpenStreetMap'}),
+  day:   L.tileLayer(OSM_TILES,{maxZoom:19,className:'tiles-day',attribution:'© OpenStreetMap'})
 };
 let baseMode='night'; TILES.night.addTo(map);
 document.getElementById('baseToggle').onclick=function(){
@@ -2015,7 +2022,7 @@ function bearing(a,b){ const y=Math.sin((b[1]-a[1])*Math.PI/180)*Math.cos(b[0]*M
 function openSiege(){
   if(!smap){
     smap=L.map('smap',{zoomControl:false,attributionControl:false}).setView(curCamp().center,curCamp().zoom);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(smap);
+    L.tileLayer(OSM_TILES,{maxZoom:19,className:'tiles-night'}).addTo(smap);
     sgLayer=L.layerGroup().addTo(smap);
     buildCampBar();
     document.getElementById('ccPrev').onclick=()=>{ stopSgPlay(); gotoPhase(sgIdx-1); };
@@ -2723,7 +2730,7 @@ function openDiscover(){
   if(!aiMap){
     aiMap = L.map('aiMap',{zoomControl:false,attributionControl:false})
       .setView(userPos||[42.6440,18.1090], userPos?16:14);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:20}).addTo(aiMap);
+    L.tileLayer(OSM_TILES,{maxZoom:19,className:'tiles-night'}).addTo(aiMap);
     aiPinLayer = L.layerGroup().addTo(aiMap);
     if(userPos) aiSetUserMarker(userPos[0],userPos[1]);
     aiLoadPlaces();
@@ -3060,8 +3067,7 @@ function openTrip(){
   if(!tripMap){
     tripMap=L.map('tripMap',{zoomControl:false}).setView([42.74,17.9],10);
     tripMap.attributionControl.setPrefix(false);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-      {maxZoom:20,attribution:'© OpenStreetMap © CARTO'}).addTo(tripMap);
+    L.tileLayer(OSM_TILES,{maxZoom:19,className:'tiles-day',attribution:'© OpenStreetMap'}).addTo(tripMap);
     tripLayer=L.layerGroup().addTo(tripMap);
     wireTripUI();
     loadTrip();
