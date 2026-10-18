@@ -54,6 +54,12 @@ body{background-image:radial-gradient(ellipse 80% 50% at 50% -10%,#16212C 0%,var
 .card.honolulu .kicker{color:var(--teal)} .card.honolulu .kicker .dot{background:var(--teal)}
 .card.honolulu .enter{color:var(--teal)}
 
+.card.sea{border-color:rgba(217,163,90,.28)}
+.card.sea:hover{border-color:#d9a35a}
+.card.sea .kicker{color:#d9a35a} .card.sea .kicker .dot{background:#d9a35a}
+.card.sea .enter{color:#d9a35a}
+@media(min-width:760px){.card.sea{grid-column:1/-1;min-height:300px}}
+
 .foot{margin-top:auto;padding-top:34px;text-align:center;color:var(--dim);font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
 </style>
 </head>
@@ -88,6 +94,19 @@ body{background-image:radial-gradient(ellipse 80% 50% at 50% -10%,#16212C 0%,var
         <div class="place">HI &middot; Waikīkī &middot; 21.28&deg;N 157.83&deg;W</div>
         <p class="desc">A live decision console for a short, no-car trip. Tap NEXT MOVE and get explainable picks tuned to time, weather and what you&rsquo;ve already done.</p>
         <div class="feats"><span class="feat">Next Move</span><span class="feat">Live Weather</span><span class="feat">Sim Panel</span></div>
+        <span class="enter">Enter <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+
+    <a class="card sea" href="/sea.html">
+      <div class="ph"><img src="/trips/sea/chiang-mai.jpg" alt="Temple rooftops in Chiang Mai, Thailand"></div>
+      <div class="scrim"></div>
+      <div class="body">
+        <div class="kicker"><span class="dot"></span>Field Console</div>
+        <h2>Vietnam + Thailand</h2>
+        <div class="place">Hanoi &middot; Ha Long &middot; Chiang Mai &middot; Railay &middot; Nov 19 &ndash; Dec 5</div>
+        <p class="desc">Five bases, seventeen days. Build each day around flights and transfers, get live weather per city, explainable next moves and Claude briefings.</p>
+        <div class="feats"><span class="feat">Day Builder</span><span class="feat">Next Move</span><span class="feat">Claude Briefings</span></div>
         <span class="enter">Enter <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
       </div>
     </a>
